@@ -1,0 +1,41 @@
+plugins {
+    id 'org.springframework.boot' version "$springBootVersion"
+    id 'io.spring.dependency-management' version "$springDependencyManagementVersion"
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    group 'com.epam.esm'
+    version '1.0-SNAPSHOT'
+
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+        annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+        testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+        testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    }
+}
+
+subprojects {
+    apply from: rootProject.file('gradle/profiles.gradle');
+}
+
+bootJar {
+    enabled = false
+}
+
+
+
+
+

@@ -1,0 +1,15 @@
+subprojects {
+    def devProfiles = 'dev'
+    def propertyDrivenProfiles;
+
+    if (project.hasProperty('dev')) {
+        propertyDrivenProfiles = devProfiles
+    }
+
+    bootRun {
+        mainClass = 'com.epam.escm.Application'
+        systemProperties = [
+                'spring.profiles.active': propertyDrivenProfiles
+        ]
+    }
+}

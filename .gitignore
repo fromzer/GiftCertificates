@@ -1,0 +1,18 @@
+﻿#############
+## Idea
+#############
+.gradle/
+build/
+target/
+doc/
+logs/
+.idea/
+.repository/
+*.iml
+*.iws
+*.class
+*.info
+*.jar
+*.war
+
+
