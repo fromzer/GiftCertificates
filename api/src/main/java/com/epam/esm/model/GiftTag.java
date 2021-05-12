@@ -10,7 +10,6 @@ import org.springframework.hateoas.RepresentationModel;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=false)
 @Builder
 public class GiftTag extends RepresentationModel<GiftTag> {
     private Long id;

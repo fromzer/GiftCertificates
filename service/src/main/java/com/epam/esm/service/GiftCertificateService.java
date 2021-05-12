@@ -2,11 +2,11 @@ package com.epam.esm.service;
 
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
-import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public interface GiftCertificateService {
      * @return entity id
      * @throws CreateResourceException if error is occurred during SQL command execution
      */
-    Long create(GiftCertificate giftCertificate) throws CreateResourceException;
+    GiftCertificate create(GiftCertificate giftCertificate) throws CreateResourceException;
 
     /**
      * Find entity

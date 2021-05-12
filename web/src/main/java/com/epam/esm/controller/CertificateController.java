@@ -1,12 +1,12 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.hateoas.CertificateResource;
-import com.epam.esm.model.Pageable;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
@@ -40,20 +40,17 @@ public class CertificateController {
     private final CertificateResource certificateResource;
     private final Validator certificateValidator;
     private final Validator paramsValidator;
-    private final Validator pageableValidator;
 
     @Autowired
     public CertificateController(
             GiftCertificateService giftCertificateService,
             @Qualifier("certificateValidator") Validator certificateValidator,
             @Qualifier("searchAndSortParamsValidator") Validator paramsValidator,
-            CertificateResource certificateResource,
-            @Qualifier("pageableValidator") Validator pageableValidator) {
+            CertificateResource certificateResource) {
         this.giftCertificateService = giftCertificateService;
         this.certificateValidator = certificateValidator;
         this.paramsValidator = paramsValidator;
         this.certificateResource = certificateResource;
-        this.pageableValidator = pageableValidator;
     }
 
     @InitBinder("certificate")
@@ -66,10 +63,6 @@ public class CertificateController {
         binder.addValidators(paramsValidator);
     }
 
-    @InitBinder("pageable")
-    public void initPageableBinder(WebDataBinder binder) {
-        binder.addValidators(pageableValidator);
-    }
 
     /**
      * Create certificate
@@ -78,7 +71,7 @@ public class CertificateController {
      * @return new certificate's id
      */
     @PostMapping
-    public ResponseEntity<Long> create(@Valid @RequestBody GiftCertificate giftCertificate) {
+    public ResponseEntity<GiftCertificate> create(@Valid @RequestBody GiftCertificate giftCertificate) {
         return ResponseEntity.ok(giftCertificateService.create(giftCertificate));
     }
 
@@ -127,7 +120,7 @@ public class CertificateController {
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(
             @Valid @ModelAttribute SearchAndSortCertificateParams params,
-            @Valid @ModelAttribute Pageable pageable) {
+            Pageable pageable) {
         return ResponseEntity
                 .ok(certificateResource.toCollectionModel(
                         giftCertificateService.findCertificateByParams(params, pageable)));

@@ -2,6 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.GiftOrder;
 
 import java.util.List;
 
@@ -20,5 +21,5 @@ public interface OrderService {
      * @return order id
      * @throws CreateResourceException if error is occurred during SQL command execution
      */
-    Long createOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
+    GiftOrder createOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
 }

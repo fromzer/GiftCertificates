@@ -5,7 +5,7 @@ import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public interface GiftTagService {
      * @return entity id
      * @throws CreateResourceException if error is occurred during SQL command execution
      */
-    Long create(GiftTag giftTag) throws CreateResourceException;
+    GiftTag create(GiftTag giftTag) throws CreateResourceException;
 
     /**
      * Find entity

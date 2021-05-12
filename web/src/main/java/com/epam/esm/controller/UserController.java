@@ -1,15 +1,16 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.entity.Order;
 import com.epam.esm.hateoas.HateoasResourceBuilder;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
@@ -18,7 +19,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,17 +40,14 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final Validator certificateValidator;
-    private final Validator pageableValidator;
     private final HateoasResourceBuilder resourceBuilder;
 
     @Autowired
     public UserController(UserService userService,
                           @Qualifier("certificateValidator") Validator certificateValidator,
-                          @Qualifier("pageableValidator") Validator pageableValidator,
                           HateoasResourceBuilder resourceBuilder) {
         this.userService = userService;
         this.certificateValidator = certificateValidator;
-        this.pageableValidator = pageableValidator;
         this.resourceBuilder = resourceBuilder;
     }
 
@@ -59,10 +56,6 @@ public class UserController {
         binder.addValidators(certificateValidator);
     }
 
-    @InitBinder("pageable")
-    public void initPageableBinder(WebDataBinder binder) {
-        binder.addValidators(pageableValidator);
-    }
 
     /**
      * Get user by id
@@ -83,8 +76,8 @@ public class UserController {
      * @return order id
      */
     @PostMapping("/{id}/orders")
-    public ResponseEntity<Long> createOrder(@PathVariable @Min(value = 1) Long id,
-                                            @Valid @RequestBody List<GiftCertificate> giftCertificates) {
+    public ResponseEntity<GiftOrder> createOrder(@PathVariable @Min(value = 1) Long id,
+                                                 @Valid @RequestBody List<GiftCertificate> giftCertificates) {
         return ResponseEntity.ok(userService.createUserOrder(id, giftCertificates));
     }
 
@@ -97,7 +90,7 @@ public class UserController {
      */
     @GetMapping("/{id}/orders")
     public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
-                                                                                 @Valid @ModelAttribute Pageable pageable) {
+                                                                                 Pageable pageable) {
         return ResponseEntity.ok(resourceBuilder.getOrderResource().toCollectionModel(
                 userService.findUserOrders(id, pageable)));
     }
@@ -133,7 +126,7 @@ public class UserController {
      * @return list of users
      */
     @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@Valid @ModelAttribute Pageable pageable) {
+    public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(resourceBuilder.getUserResource().toCollectionModel(
                 userService.findAll(pageable)));
     }

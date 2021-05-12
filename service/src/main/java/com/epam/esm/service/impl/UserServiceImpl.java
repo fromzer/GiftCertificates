@@ -1,21 +1,22 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.GiftTagDao;
-import com.epam.esm.dao.OrderDao;
-import com.epam.esm.dao.UserDao;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.mapper.OrderMapper;
+import com.epam.esm.mapper.TagMapper;
+import com.epam.esm.mapper.UserMapper;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
-import com.epam.esm.model.SearchOrderByUserIdParams;
 import com.epam.esm.model.UserGift;
+import com.epam.esm.repository.OrderRepository;
+import com.epam.esm.repository.TagRepository;
+import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,60 +25,62 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final GiftTagDao tagDao;
-    private final UserDao userDao;
-    private final OrderDao orderDao;
     private final OrderService orderService;
-    private ModelMapper mapper = new ModelMapper();
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final TagRepository tagRepository;
+
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, OrderDao orderDao, GiftTagDao tagDao, OrderService orderService) {
-        this.userDao = userDao;
-        this.orderDao = orderDao;
-        this.tagDao = tagDao;
+    public UserServiceImpl(OrderService orderService, UserRepository userRepository, OrderRepository orderRepository, TagRepository tagRepository) {
         this.orderService = orderService;
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.tagRepository = tagRepository;
     }
 
     @Override
     public UserGift findById(Long id) throws ResourceNotFoundException {
-        return mapper.map(Optional.ofNullable(userDao.findById(id))
-                        .orElseThrow(ResourceNotFoundException::new),
-                UserGift.class);
+        return UserMapper.USER_MAPPER.userToUserGift(userRepository.findById(id)
+                .orElseThrow(ResourceNotFoundException::new));
     }
 
     @Override
     public List<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException {
-        return userDao.findAll(pageable).stream()
-                .map(user -> mapper.map(user, UserGift.class))
+        return userRepository.findAll(pageable).stream()
+                .map(UserMapper.USER_MAPPER::userToUserGift)
                 .collect(Collectors.toList());
     }
 
 
     @Override
     public GiftOrderWithoutCertificatesAndUser findUserOrderInfo(Long orderId, Long userId) throws ResourceNotFoundException {
-        return Optional.ofNullable(orderDao.findByUserIdAndOrderId(orderId, userId))
-                .map(byId -> mapper.map(byId, GiftOrderWithoutCertificatesAndUser.class))
+        return orderRepository.findOrderByIdAndUserId(orderId, userId)
+                .map(order -> GiftOrderWithoutCertificatesAndUser.builder()
+                        .cost(order.getCost())
+                        .purchaseDate(order.getPurchaseDate())
+                        .build())
                 .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
     public List<GiftOrder> findUserOrders(Long id, Pageable pageable) {
-        Optional.ofNullable(userDao.findById(id))
+        userRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
-        return orderDao.findOrdersByUserId(new SearchOrderByUserIdParams(id), pageable).stream()
-                .map(order -> mapper.map(order, GiftOrder.class))
+        return orderRepository.findByUserId(id, pageable).stream()
+                .map(OrderMapper.ORDER_MAPPER::orderToGiftOrder)
                 .collect(Collectors.toList());
     }
 
     @Override
     public GiftTag findMostPopularUserTag(Long userId) throws ResourceNotFoundException {
-        return Optional.ofNullable(tagDao.findMostPopularUserTag(userId))
-                .map(tag -> mapper.map(tag, GiftTag.class))
+        return Optional.ofNullable(tagRepository.getMostPopularUserTag(userId))
+                .map(TagMapper.TAG_MAPPER::tagToGiftTag)
                 .orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
-    public Long createUserOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException {
+    public GiftOrder createUserOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException {
         return orderService.createOrder(userId, giftCertificates);
     }
 }

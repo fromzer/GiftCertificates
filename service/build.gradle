@@ -1,7 +1,9 @@
 plugins {
     id 'application'
 }
-
+ext {
+    mapstructVersion = "1.4.2.Final"
+}
 dependencies {
     implementation project(':persistence')
     implementation project(':api')
@@ -9,6 +11,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation group: 'org.mapstruct', name: 'mapstruct', version: mapstructVersion
+    annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: mapstructVersion
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: commonsCollectionsVers
     implementation group: 'org.modelmapper', name: 'modelmapper', version: modelmapperVersion
 }

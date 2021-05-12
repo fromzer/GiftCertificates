@@ -4,7 +4,7 @@ import com.epam.esm.controller.CertificateController;
 import com.epam.esm.controller.TagController;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
@@ -22,7 +22,7 @@ public class CertificateResource implements SimpleRepresentationModelAssembler<G
     @Override
     public void addLinks(EntityModel<GiftCertificate> resource) {
         resource.add(linkTo(methodOn(CertificateController.class).getCertificateById(Objects.requireNonNull(resource.getContent()).getId())).withSelfRel());
-        resource.add(linkTo(methodOn(CertificateController.class).getCertificatesWithParameters(null, new Pageable())).withSelfRel());
+        resource.add(linkTo(methodOn(CertificateController.class).getCertificatesWithParameters(null, null)).withSelfRel());
         if (resource.getContent().getTags() != null) {
             addTagLinks(resource);
         }
@@ -39,6 +39,6 @@ public class CertificateResource implements SimpleRepresentationModelAssembler<G
 
     @Override
     public void addLinks(CollectionModel<EntityModel<GiftCertificate>> resources) {
-        resources.add(linkTo(methodOn(CertificateController.class).getCertificatesWithParameters(null, new Pageable())).withSelfRel());
+        resources.add(linkTo(methodOn(CertificateController.class).getCertificatesWithParameters(null, null)).withSelfRel());
     }
 }

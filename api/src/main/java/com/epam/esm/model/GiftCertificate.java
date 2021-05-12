@@ -14,7 +14,6 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper=false)
 @Builder
 public class GiftCertificate extends RepresentationModel<GiftCertificate> {
     private Long id;

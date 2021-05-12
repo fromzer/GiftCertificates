@@ -2,10 +2,10 @@ package com.epam.esm.controller;
 
 import com.epam.esm.hateoas.TagResource;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
 import com.epam.esm.service.GiftTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
@@ -38,27 +38,19 @@ public class TagController {
     private final GiftTagService tagService;
     private final TagResource tagResource;
     private final Validator tagValidator;
-    private final Validator pageableValidator;
 
     @Autowired
     public TagController(GiftTagService tagService,
                          TagResource tagResource,
-                         @Qualifier("tagValidator") Validator tagValidator,
-                         @Qualifier("pageableValidator") Validator pageableValidator) {
+                         @Qualifier("tagValidator") Validator tagValidator) {
         this.tagService = tagService;
         this.tagResource = tagResource;
         this.tagValidator = tagValidator;
-        this.pageableValidator = pageableValidator;
     }
 
     @InitBinder("tag")
     public void initTagBinder(WebDataBinder binder) {
         binder.addValidators(tagValidator);
-    }
-
-    @InitBinder("pageable")
-    public void initPageableBinder(WebDataBinder binder) {
-        binder.addValidators(pageableValidator);
     }
 
     /**
@@ -68,7 +60,7 @@ public class TagController {
      * @return the tag id
      */
     @PostMapping
-    public ResponseEntity<Long> create(@Valid @RequestBody GiftTag tag) {
+    public ResponseEntity<GiftTag> create(@Valid @RequestBody GiftTag tag) {
         return ResponseEntity.ok(tagService.create(tag));
     }
 
@@ -102,7 +94,7 @@ public class TagController {
      * @return List of GiftTags
      */
     @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(@Valid @ModelAttribute Pageable pageable) {
+    public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(
                 tagResource.toCollectionModel(
                         tagService.findAll(pageable)));

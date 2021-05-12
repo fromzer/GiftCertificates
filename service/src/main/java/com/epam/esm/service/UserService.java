@@ -6,8 +6,8 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
 import com.epam.esm.model.UserGift;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -73,5 +73,5 @@ public interface UserService {
      * @return order id
      * @throws CreateResourceException if error is occurred during SQL command execution
      */
-    Long createUserOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
+    GiftOrder createUserOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
 }
