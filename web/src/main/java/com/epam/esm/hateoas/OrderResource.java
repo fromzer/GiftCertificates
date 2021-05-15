@@ -20,6 +20,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class OrderResource implements SimpleRepresentationModelAssembler<GiftOrder> {
+    private static final String GET_ORDER = "get_order";
+    private static final String GET_ORDERS = "get_user_orders";
 
     private final UserResource userResource;
     private final CertificateResource certificateResource;
@@ -33,7 +35,7 @@ public class OrderResource implements SimpleRepresentationModelAssembler<GiftOrd
     @Override
     public void addLinks(EntityModel<GiftOrder> resource) {
         resource.add(linkTo(methodOn(UserController.class)
-                .getUserOrder(Objects.requireNonNull(resource.getContent()).getUser().getId(), resource.getContent().getId())).withSelfRel());
+                .getUserOrder(resource.getContent().getUser().getId(), resource.getContent().getId())).withRel(GET_ORDER));
         GiftOrder giftOrder = resource.getContent();
         UserGift user = giftOrder.getUser();
         user.add(userResource.toModel(user).getLinks());
@@ -51,9 +53,10 @@ public class OrderResource implements SimpleRepresentationModelAssembler<GiftOrd
                 .orElse(0);
         UriComponentsBuilder componentsBuilder = linkTo(methodOn(UserController.class)
                 .getUserOrders(userId, null))
-                .toUriComponentsBuilder();
+                .toUriComponentsBuilder()
+                .replaceQuery("{?page,size}");;
         componentsBuilder.encode();
         Link link = Link.of(componentsBuilder.toUriString());
-        resources.add(link.withSelfRel());
+        resources.add(link.withRel(GET_ORDERS));
     }
 }

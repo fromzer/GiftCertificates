@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TagRepository extends PagingAndSortingRepository<Tag, Long> {
+    //criteria
     String selectMostPopularUserTag = "SELECT id, name from (" +
             "SELECT t.id, t.name, count(*) as quantity, sum(cost) as sum_cost, user_id " +
             "from orders " +

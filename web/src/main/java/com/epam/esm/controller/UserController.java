@@ -1,13 +1,14 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.entity.Order;
 import com.epam.esm.hateoas.HateoasResourceBuilder;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
+import com.epam.esm.model.RegisteredUser;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.UserService;
+import com.epam.esm.service.impl.AuthenticatedUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,21 +43,23 @@ public class UserController {
     private final UserService userService;
     private final Validator certificateValidator;
     private final HateoasResourceBuilder resourceBuilder;
+    private final AuthenticatedUserService authenticatedUserService;
 
     @Autowired
     public UserController(UserService userService,
                           @Qualifier("certificateValidator") Validator certificateValidator,
-                          HateoasResourceBuilder resourceBuilder) {
+                          HateoasResourceBuilder resourceBuilder,
+                          AuthenticatedUserService authenticatedUserService) {
         this.userService = userService;
         this.certificateValidator = certificateValidator;
         this.resourceBuilder = resourceBuilder;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @InitBinder("certificate")
     public void initCertificateBinder(WebDataBinder binder) {
         binder.addValidators(certificateValidator);
     }
-
 
     /**
      * Get user by id
@@ -64,6 +68,7 @@ public class UserController {
      * @return user
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<EntityModel<UserGift>> getUserById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(resourceBuilder.getUserResource().toModel(userService.findById(id)));
     }
@@ -76,6 +81,7 @@ public class UserController {
      * @return order id
      */
     @PostMapping("/{id}/orders")
+    @PreAuthorize("hasRole('EDITOR') or (hasRole('BUYER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<GiftOrder> createOrder(@PathVariable @Min(value = 1) Long id,
                                                  @Valid @RequestBody List<GiftCertificate> giftCertificates) {
         return ResponseEntity.ok(userService.createUserOrder(id, giftCertificates));
@@ -89,6 +95,7 @@ public class UserController {
      * @return list of user orders
      */
     @GetMapping("/{id}/orders")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
                                                                                  Pageable pageable) {
         return ResponseEntity.ok(resourceBuilder.getOrderResource().toCollectionModel(
@@ -103,6 +110,7 @@ public class UserController {
      * @return user order
      */
     @GetMapping("/{id}/orders/{orderId}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<GiftOrderWithoutCertificatesAndUser> getUserOrder(@PathVariable @Min(value = 1) Long id,
                                                                             @PathVariable @Min(value = 1) Long orderId) {
         return ResponseEntity.ok(userService.findUserOrderInfo(orderId, id));
@@ -115,6 +123,7 @@ public class UserController {
      * @return tag
      */
     @GetMapping("/{id}/tag")
+    @PreAuthorize("hasRole('EDITOR') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<EntityModel<GiftTag>> getMostPopularUserTag(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(resourceBuilder.getTagResource().toModel(userService.findMostPopularUserTag(id)));
     }
@@ -126,6 +135,7 @@ public class UserController {
      * @return list of users
      */
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(resourceBuilder.getUserResource().toCollectionModel(
                 userService.findAll(pageable)));

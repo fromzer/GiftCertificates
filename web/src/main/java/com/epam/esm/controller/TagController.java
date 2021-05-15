@@ -10,12 +10,12 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,20 +37,12 @@ public class TagController {
 
     private final GiftTagService tagService;
     private final TagResource tagResource;
-    private final Validator tagValidator;
 
     @Autowired
     public TagController(GiftTagService tagService,
-                         TagResource tagResource,
-                         @Qualifier("tagValidator") Validator tagValidator) {
+                         TagResource tagResource) {
         this.tagService = tagService;
         this.tagResource = tagResource;
-        this.tagValidator = tagValidator;
-    }
-
-    @InitBinder("tag")
-    public void initTagBinder(WebDataBinder binder) {
-        binder.addValidators(tagValidator);
     }
 
     /**
@@ -60,6 +52,7 @@ public class TagController {
      * @return the tag id
      */
     @PostMapping
+    @PreAuthorize("hasRole('EDITOR')")
     public ResponseEntity<GiftTag> create(@Valid @RequestBody GiftTag tag) {
         return ResponseEntity.ok(tagService.create(tag));
     }
@@ -71,6 +64,7 @@ public class TagController {
      * @return the response entity
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('EDITOR')")
     public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         tagService.delete(id);
         return ResponseEntity.noContent().build();
@@ -83,6 +77,7 @@ public class TagController {
      * @return the tag
      */
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<EntityModel<GiftTag>> getTagById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(tagResource.toModel(tagService.findById(id)));
     }
@@ -94,6 +89,7 @@ public class TagController {
      * @return List of GiftTags
      */
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<CollectionModel<EntityModel<GiftTag>>> getAll(Pageable pageable) {
         return ResponseEntity.ok(
                 tagResource.toCollectionModel(

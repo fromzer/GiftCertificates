@@ -1,8 +1,8 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.hateoas.CertificateResource;
-import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,6 +11,8 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -71,6 +73,7 @@ public class CertificateController {
      * @return new certificate's id
      */
     @PostMapping
+    @PreAuthorize("hasRole('EDITOR')")
     public ResponseEntity<GiftCertificate> create(@Valid @RequestBody GiftCertificate giftCertificate) {
         return ResponseEntity.ok(giftCertificateService.create(giftCertificate));
     }
@@ -82,6 +85,7 @@ public class CertificateController {
      * @return certificate and tags
      */
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('EDITOR')")
     public ResponseEntity<GiftCertificate> update(@Valid @RequestBody GiftCertificate giftCertificate,
                                                   @PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(giftCertificateService.update(giftCertificate, id));
@@ -94,6 +98,7 @@ public class CertificateController {
      * @return response entity
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('EDITOR')")
     public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         giftCertificateService.delete(id);
         return ResponseEntity.noContent().build();
@@ -106,6 +111,7 @@ public class CertificateController {
      * @return the certificate
      */
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<EntityModel<GiftCertificate>> getCertificateById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(certificateResource.toModel(giftCertificateService.findById(id)));
     }
@@ -118,6 +124,7 @@ public class CertificateController {
      * @return list of certificates
      */
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(
             @Valid @ModelAttribute SearchAndSortCertificateParams params,
             Pageable pageable) {
