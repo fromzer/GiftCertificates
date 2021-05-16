@@ -2,22 +2,18 @@ package com.epam.esm.controller;
 
 import com.epam.esm.hateoas.CertificateResource;
 import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.ModifiedGiftCertificate;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.Validator;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,31 +36,14 @@ import javax.validation.constraints.Min;
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
     private final CertificateResource certificateResource;
-    private final Validator certificateValidator;
-    private final Validator paramsValidator;
 
     @Autowired
     public CertificateController(
             GiftCertificateService giftCertificateService,
-            @Qualifier("certificateValidator") Validator certificateValidator,
-            @Qualifier("searchAndSortParamsValidator") Validator paramsValidator,
             CertificateResource certificateResource) {
         this.giftCertificateService = giftCertificateService;
-        this.certificateValidator = certificateValidator;
-        this.paramsValidator = paramsValidator;
         this.certificateResource = certificateResource;
     }
-
-    @InitBinder("certificate")
-    public void initCertificateBinder(WebDataBinder binder) {
-        binder.addValidators(certificateValidator);
-    }
-
-    @InitBinder("params")
-    public void initSearchParamsBinder(WebDataBinder binder) {
-        binder.addValidators(paramsValidator);
-    }
-
 
     /**
      * Create certificate
@@ -81,14 +60,14 @@ public class CertificateController {
     /**
      * Update certificate and optionally create received tags
      *
-     * @param giftCertificate the certificate and optionally tags
+     * @param modifiedGiftCertificate the certificate and optionally tags
      * @return certificate and tags
      */
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('EDITOR')")
-    public ResponseEntity<GiftCertificate> update(@Valid @RequestBody GiftCertificate giftCertificate,
+    public ResponseEntity<GiftCertificate> update(@Valid @RequestBody ModifiedGiftCertificate modifiedGiftCertificate,
                                                   @PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(giftCertificateService.update(giftCertificate, id));
+        return ResponseEntity.ok(giftCertificateService.update(modifiedGiftCertificate, id));
     }
 
     /**
@@ -126,8 +105,7 @@ public class CertificateController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(
-            @Valid @ModelAttribute SearchAndSortCertificateParams params,
-            Pageable pageable) {
+            @Valid @ModelAttribute SearchAndSortCertificateParams params, Pageable pageable) {
         return ResponseEntity
                 .ok(certificateResource.toCollectionModel(
                         giftCertificateService.findCertificateByParams(params, pageable)));

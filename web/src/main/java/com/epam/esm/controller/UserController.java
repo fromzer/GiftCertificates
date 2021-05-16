@@ -5,22 +5,17 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.RegisteredUser;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.UserService;
 import com.epam.esm.service.impl.AuthenticatedUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.Validator;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,24 +36,16 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/users", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class UserController {
     private final UserService userService;
-    private final Validator certificateValidator;
     private final HateoasResourceBuilder resourceBuilder;
     private final AuthenticatedUserService authenticatedUserService;
 
     @Autowired
     public UserController(UserService userService,
-                          @Qualifier("certificateValidator") Validator certificateValidator,
                           HateoasResourceBuilder resourceBuilder,
                           AuthenticatedUserService authenticatedUserService) {
         this.userService = userService;
-        this.certificateValidator = certificateValidator;
         this.resourceBuilder = resourceBuilder;
         this.authenticatedUserService = authenticatedUserService;
-    }
-
-    @InitBinder("certificate")
-    public void initCertificateBinder(WebDataBinder binder) {
-        binder.addValidators(certificateValidator);
     }
 
     /**

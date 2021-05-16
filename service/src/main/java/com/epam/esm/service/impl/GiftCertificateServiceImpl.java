@@ -9,8 +9,10 @@ import com.epam.esm.exception.ExistEntityException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.mapper.CertificateMapper;
+import com.epam.esm.mapper.ModifiedCertificateMapper;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftTag;
+import com.epam.esm.model.ModifiedGiftCertificate;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.repository.CertificateRepository;
 import com.epam.esm.repository.TagRepository;
@@ -50,12 +52,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public GiftCertificate update(GiftCertificate giftCertificate, Long id) throws UpdateResourceException {
+    public GiftCertificate update(ModifiedGiftCertificate modifiedGiftCertificate, Long id) throws UpdateResourceException {
+        GiftCertificate giftCertificate = ModifiedCertificateMapper.MODIFIED_CERTIFICATE_MAPPER.modifiedGiftCertificateToGiftCertificate(modifiedGiftCertificate);
         searchExistingTag(giftCertificate);
         GiftCertificate existing = Optional.ofNullable(findById(id))
                 .map(certificate -> {
                     Set<GiftTag> tags = certificate.getTags();
-                    GiftServiceUtils.copyNonNullProperties(giftCertificate, certificate);
+                    GiftServiceUtils.copyNonNullProperties(modifiedGiftCertificate, certificate);
                     certificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.of(ZONE)));
                     Optional.ofNullable(tags)
                             .map(previousTags -> certificate.getTags().addAll(previousTags));

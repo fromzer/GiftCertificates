@@ -2,6 +2,7 @@ package com.epam.esm.service;
 
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
+import com.epam.esm.model.ModifiedGiftCertificate;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
@@ -57,7 +58,7 @@ public interface GiftCertificateService {
      * @return updated GiftCertificate
      * @throws UpdateResourceException if fail to update data
      */
-    GiftCertificate update(GiftCertificate giftCertificate, Long id) throws UpdateResourceException;
+    GiftCertificate update(ModifiedGiftCertificate modifiedGiftCertificate, Long id) throws UpdateResourceException;
 
     /**
      * Find entity
