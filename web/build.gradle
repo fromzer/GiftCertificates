@@ -21,6 +21,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation group: 'mysql', name: 'mysql-connector-java', version: mysqlConnectorVersion
     implementation group: 'javax.validation', name: 'validation-api', version: jxValidationApiVersion
+    testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation group: 'com.h2database', name: 'h2', version: h2dbVersion
     implementation "junit:junit:$junitVersion"

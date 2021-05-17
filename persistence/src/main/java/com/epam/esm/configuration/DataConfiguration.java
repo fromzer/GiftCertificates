@@ -22,10 +22,10 @@ import java.util.Properties;
 @EnableTransactionManagement
 public class DataConfiguration {
     private final static String PACKAGE_TO_SCAN = "com.epam.esm.entity";
-    private final static String HIBERNATE_DIALECT ="hibernate.dialect";
-    private final static String HIBERNATE_FORMAT_SQL ="hibernate.format_sql";
-    private final static String HIBERNATE_SHOW_SQL ="hibernate.show_sql";
-    private final static String HIBERNATE_HBM2DDL_AUTO ="hibernate.hbm2ddl.auto";
+    private final static String HIBERNATE_DIALECT = "hibernate.dialect";
+    private final static String HIBERNATE_FORMAT_SQL = "hibernate.format_sql";
+    private final static String HIBERNATE_SHOW_SQL = "hibernate.show_sql";
+    private final static String HIBERNATE_HBM2DDL_AUTO = "hibernate.hbm2ddl.auto";
     @Value("${spring.datasource.driver-class-name}")
     private String driverName;
     @Value("${spring.datasource.url}")
@@ -55,7 +55,6 @@ public class DataConfiguration {
         jdbcConfig.setMaximumPoolSize(Integer.parseInt(maxPoolSize));
         return new HikariDataSource(jdbcConfig);
     }
-
 
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {

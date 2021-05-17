@@ -41,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public GiftOrder createOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException {
-        return Optional.ofNullable(userRepository.findById(userId))
+        return Optional.of(userRepository.findById(userId))
                 .map(user -> buildGiftOrder(giftCertificates, user.get()))
                 .map(order -> mapper.map(order, Order.class))
                 .map(orderRepository::save)

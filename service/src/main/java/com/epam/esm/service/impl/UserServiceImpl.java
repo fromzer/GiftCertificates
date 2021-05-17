@@ -11,7 +11,6 @@ import com.epam.esm.mapper.OrderMapper;
 import com.epam.esm.mapper.RegisteredUserMapper;
 import com.epam.esm.mapper.TagMapper;
 import com.epam.esm.mapper.UserMapper;
-import com.epam.esm.model.AuthenticationRequestDTO;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
@@ -27,13 +26,13 @@ import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -140,5 +139,13 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByLogin(login)
                 .orElseThrow(UserNotFoundException::new);
         return SecurityUser.fromUser(user);
+    }
+
+    @Override
+    public boolean hasId(Long id) {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        User byLogin = userRepository.findByLogin(login)
+                .orElseThrow(UserNotFoundException::new);
+        return byLogin.getId().equals(id);
     }
 }
