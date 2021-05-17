@@ -81,6 +81,4 @@ public interface UserService extends UserDetailsService {
     UserGift createUser(RegisteredUser registeredUser);
 
     User findUserByLogin(String login);
-
-    boolean hasId(Long id);
 }
