@@ -9,20 +9,16 @@ import org.springframework.hateoas.server.SimpleRepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Optional;
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
 public class TagResource implements SimpleRepresentationModelAssembler<GiftTag> {
-    private static final String DELETE = "delete";
     private static final String GET_ALL_TAGS = "get_all_tags";
 
     @Override
     public void addLinks(EntityModel<GiftTag> resource) {
         resource.add(linkTo(methodOn(TagController.class).getTagById(resource.getContent().getId())).withSelfRel());
-        resource.add(linkTo(methodOn(TagController.class).delete(resource.getContent().getId())).withRel(DELETE));
     }
 
     @Override

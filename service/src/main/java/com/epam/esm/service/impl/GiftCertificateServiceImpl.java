@@ -22,6 +22,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,8 @@ import java.util.stream.Stream;
 @Transactional
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private static final Logger logger = LoggerFactory.getLogger(GiftCertificateServiceImpl.class);
-    private final static String ZONE = "+03:00";
+    @Value("${date.time-zone}")
+    private String timeZone;
 
     private final CertificateRepository certificateRepository;
     private final TagRepository tagRepository;
@@ -59,7 +61,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                 .map(certificate -> {
                     Set<GiftTag> tags = certificate.getTags();
                     GiftServiceUtils.copyNonNullProperties(modifiedGiftCertificate, certificate);
-                    certificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.of(ZONE)));
+                    certificate.setLastUpdateDate(ZonedDateTime.now(ZoneId.of(timeZone)));
                     Optional.ofNullable(tags)
                             .map(previousTags -> certificate.getTags().addAll(previousTags));
                     return certificate;

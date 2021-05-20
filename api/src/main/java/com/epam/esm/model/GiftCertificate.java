@@ -3,6 +3,7 @@ package com.epam.esm.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.hateoas.RepresentationModel;
@@ -17,6 +18,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Builder
 public class GiftCertificate extends RepresentationModel<GiftCertificate> {
     private Long id;

@@ -4,18 +4,14 @@ import com.epam.esm.hateoas.TagResource;
 import com.epam.esm.model.GiftTag;
 import com.epam.esm.service.GiftTagService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.Validator;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,7 +48,7 @@ public class TagController {
      * @return the tag id
      */
     @PostMapping
-    @PreAuthorize("hasRole('EDITOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GiftTag> create(@Valid @RequestBody GiftTag tag) {
         return ResponseEntity.ok(tagService.create(tag));
     }
@@ -64,7 +60,7 @@ public class TagController {
      * @return the response entity
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('EDITOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         tagService.delete(id);
         return ResponseEntity.noContent().build();

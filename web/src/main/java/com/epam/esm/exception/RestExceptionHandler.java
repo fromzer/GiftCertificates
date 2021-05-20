@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,14 +35,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "exception.internalServer";
     private static final String METHOD_NOT_SUPPORTED = "exception.methodNotSupported";
     private static final String NOT_VALID_VALUE = "exception.notValidValue";
-    private static final String INVALID_LOGIN_OR_PASSWORD = "exception.notValidCredentials";
+    private static final String INVALID_LOGIN = "exception.notValidLogin";
     private static final String TOKEN_NOT_VALID = "exception.tokenNotValid";
+    private static final String LOGIN_EXIST_MESSAGE = "exception.loginExist";
     private static final String ACCESS_DENIED = "exception.accessDenied";
     private static final String PASSWORD_MISMATCH = "exception.passwordMismatch";
+    private static final String INVALID_PASSWORD = "exception.invalidPassword";
 
     private final MessageSource messageSource;
     private final Locale defaultLocale = Locale.getDefault();
-
 
     @Autowired
     public RestExceptionHandler(MessageSource messageSource) {
@@ -57,17 +57,37 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = AuthenticationException.class)
-    protected ResponseEntity<ErrorMessage> handleAuthenticationException(Locale locale) {
-        String msg = messageSource.getMessage(INVALID_LOGIN_OR_PASSWORD, null, locale);
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40301");
-        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
-    }
-
     @ExceptionHandler(value = JwtAuthenticationException.class)
     protected ResponseEntity<ErrorMessage> handleJwtAuthenticationException(Locale locale) {
         String msg = messageSource.getMessage(TOKEN_NOT_VALID, null, locale);
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40301");
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = LoginExistsException.class)
+    protected ResponseEntity<ErrorMessage> handleLoginExistsException(Locale locale) {
+        String msg = messageSource.getMessage(LOGIN_EXIST_MESSAGE, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.UNPROCESSABLE_ENTITY.value(), msg, "42201");
+        return new ResponseEntity<>(errorMessage, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(value = UserBlockedException.class)
+    protected ResponseEntity<ErrorMessage> handleUserBlockedException(UserBlockedException exception) {
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), exception.getLocalizedMessage(), "40308");
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = BadPasswordException.class)
+    protected ResponseEntity<ErrorMessage> handleBadPasswordException(Locale locale) {
+        String msg = messageSource.getMessage(INVALID_PASSWORD, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40306");
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = UserNotFoundException.class)
+    protected ResponseEntity<ErrorMessage> handleUserNotFoundException(Locale locale) {
+        String msg = messageSource.getMessage(INVALID_LOGIN, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40309");
         return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
     }
 

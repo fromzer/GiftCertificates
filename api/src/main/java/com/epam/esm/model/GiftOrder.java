@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "user")
+@EqualsAndHashCode(callSuper = false)
 @Builder
 public class GiftOrder extends RepresentationModel<GiftOrder> {
     private Long id;

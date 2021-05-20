@@ -5,6 +5,7 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.repository.CertificateRepositoryCustom;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Repository
 public class CertificateRepositoryCustomImpl implements CertificateRepositoryCustom {
     private static final String NAME = "name";
     private static final String TAGS = "tags";

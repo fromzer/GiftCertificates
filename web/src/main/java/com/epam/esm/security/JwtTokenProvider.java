@@ -28,7 +28,6 @@ import java.util.Optional;
 public class JwtTokenProvider {
     private final static String TOKEN_SUB_STRING = "Bearer ";
     private final static String EMPTY = "";
-    private final static String ZONE = "+03:00";
     private final UserService userService;
 
     @Value("${jwt.secret}")
@@ -37,6 +36,8 @@ public class JwtTokenProvider {
     private String authorizationHeader;
     @Value("${jwt.expirationInMinutes}")
     private long expirationInMinutes;
+    @Value("${date.time-zone}")
+    private String timeZone;
 
     @Autowired
     public JwtTokenProvider(UserService userService) {
@@ -51,8 +52,8 @@ public class JwtTokenProvider {
     public String generateToken(User user) {
         Claims claims = Jwts.claims().setSubject(user.getLogin());
         claims.put("role", user.getRoles());
-        ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.of(ZONE));
-        ZonedDateTime validity = LocalDateTime.now().plusMinutes(expirationInMinutes).atZone(ZoneId.of(ZONE));
+        ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.of(timeZone));
+        ZonedDateTime validity = LocalDateTime.now().plusMinutes(expirationInMinutes).atZone(ZoneId.of(timeZone));
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(Date.from(now.toInstant()))
@@ -66,7 +67,7 @@ public class JwtTokenProvider {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             Optional.ofNullable(claimsJws.getBody().getExpiration())
                     .orElseThrow(() -> new JwtAuthenticationException("Token is expired or invalid"));
-            return !claimsJws.getBody().getExpiration().before(Date.from(LocalDateTime.now().atZone(ZoneId.of(ZONE)).toInstant()));
+            return !claimsJws.getBody().getExpiration().before(Date.from(LocalDateTime.now().atZone(ZoneId.of(timeZone)).toInstant()));
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtAuthenticationException("Token is expired or invalid");
         }

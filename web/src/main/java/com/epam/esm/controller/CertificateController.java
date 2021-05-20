@@ -52,7 +52,7 @@ public class CertificateController {
      * @return new certificate's id
      */
     @PostMapping
-    @PreAuthorize("hasRole('EDITOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GiftCertificate> create(@Valid @RequestBody GiftCertificate giftCertificate) {
         return ResponseEntity.ok(giftCertificateService.create(giftCertificate));
     }
@@ -64,7 +64,7 @@ public class CertificateController {
      * @return certificate and tags
      */
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('EDITOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GiftCertificate> update(@Valid @RequestBody ModifiedGiftCertificate modifiedGiftCertificate,
                                                   @PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(giftCertificateService.update(modifiedGiftCertificate, id));
@@ -77,7 +77,7 @@ public class CertificateController {
      * @return response entity
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('EDITOR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable @Min(value = 1) Long id) {
         giftCertificateService.delete(id);
         return ResponseEntity.noContent().build();

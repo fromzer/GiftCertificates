@@ -81,4 +81,6 @@ public interface UserService extends UserDetailsService {
     UserGift createUser(RegisteredUser registeredUser);
 
     User findUserByLogin(String login);
+
+    void changeValueLoginAttemptsAndLockDate(String login);
 }

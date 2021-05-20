@@ -1,7 +1,7 @@
 package com.epam.esm.model;
 
 import com.epam.esm.entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.epam.esm.entity.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,12 +14,13 @@ public class SecurityUser implements UserDetails {
     private final String username;
     private final String password;
     private final List<SimpleGrantedAuthority> authorities;
+    private final boolean isActive;
 
-    @Autowired
-    public SecurityUser(String username, String password, List<SimpleGrantedAuthority> authorities) {
+    public SecurityUser(String username, String password, List<SimpleGrantedAuthority> authorities, boolean isActive) {
         this.username = username;
         this.password = password;
         this.authorities = authorities;
+        this.isActive = isActive;
     }
 
     @Override
@@ -39,17 +40,17 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return isActive;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isActive;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return isActive;
     }
 
     @Override
@@ -61,6 +62,10 @@ public class SecurityUser implements UserDetails {
         return new org.springframework.security.core.userdetails.User(
                 user.getLogin(),
                 user.getPassword(),
+                user.getUserStatus().equals(UserStatus.ACTIVE),
+                user.getUserStatus().equals(UserStatus.ACTIVE),
+                user.getUserStatus().equals(UserStatus.ACTIVE),
+                user.getUserStatus().equals(UserStatus.ACTIVE),
                 user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getName()))
                         .collect(Collectors.toList()));

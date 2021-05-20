@@ -2,6 +2,7 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
+import com.epam.esm.entity.UserStatus;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.LoginExistsException;
 import com.epam.esm.exception.PasswordMismatchException;
@@ -25,6 +26,7 @@ import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,6 +34,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,6 +45,14 @@ import java.util.stream.Stream;
 public class UserServiceImpl implements UserService {
     private final static String ROLE_VIEWER = "ROLE_VIEWER";
     private final static String ROLE_BUYER = "ROLE_BUYER";
+    private final static int ZERO = 0;
+    private final static int ONE = 1;
+    @Value("${password.numberOfAttempts}")
+    private int numberOfAttempts;
+    @Value("${password.lockingTimeInHours}")
+    private int lockingTime;
+    @Value("${date.time-zone}")
+    private String timeZone;
     private final OrderService orderService;
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
@@ -70,7 +82,6 @@ public class UserServiceImpl implements UserService {
                 .map(UserMapper.USER_MAPPER::userToUserGift)
                 .collect(Collectors.toList());
     }
-
 
     @Override
     public GiftOrderWithoutCertificatesAndUser findUserOrderInfo(Long orderId, Long userId) throws ResourceNotFoundException {
@@ -108,8 +119,42 @@ public class UserServiceImpl implements UserService {
         checkCredentialsRegisteredUser(registeredUser);
         User user = RegisteredUserMapper.REGISTER_USER_MAPPER.registeredUserToUser(registeredUser);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setUserStatus(UserStatus.ACTIVE);
         addDefaultRoles(user);
         return UserMapper.USER_MAPPER.userToUserGift(userRepository.save(user));
+    }
+
+    @Override
+    public User findUserByLogin(String login) {
+        User user = userRepository.findByLogin(login)
+                .orElseThrow(UserNotFoundException::new);
+        if (user.getAttempt() > 0) {
+            user.setAttempt(0);
+            userRepository.save(user);
+        }
+        return user;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        User user = userRepository.findByLogin(login)
+                .orElseThrow(UserNotFoundException::new);
+        unblockUser(user);
+        return SecurityUser.fromUser(user);
+    }
+
+    @Override
+    public void changeValueLoginAttemptsAndLockDate(String login) {
+        User user = userRepository.findByLogin(login)
+                .orElseThrow(UserNotFoundException::new);
+        int attempt = user.getAttempt();
+        if (user.getAttempt() >= (numberOfAttempts - ONE)) {
+            user.setAttempt(++attempt);
+            user.setLockDate(LocalDateTime.now().atZone(ZoneId.of(timeZone)));
+            user.setUserStatus(UserStatus.BLOCKED);
+        }
+        user.setAttempt(++attempt);
+        userRepository.save(user);
     }
 
     private void addDefaultRoles(User user) {
@@ -127,16 +172,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public User findUserByLogin(String login) {
-        return userRepository.findByLogin(login)
-                .orElseThrow(UserNotFoundException::new);
+    private void unblockUser(User user) {
+        if (isExpiredLockTime(user) && user.getLockDate() != null && user.getAttempt() > numberOfAttempts) {
+            user.setAttempt(ZERO);
+            user.setUserStatus(UserStatus.ACTIVE);
+            userRepository.save(user);
+        }
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        User user = userRepository.findByLogin(login)
-                .orElseThrow(UserNotFoundException::new);
-        return SecurityUser.fromUser(user);
+    private Boolean isExpiredLockTime(User user) {
+        return Optional.ofNullable(user.getLockDate())
+                .map(current -> current.plusHours(lockingTime).isBefore(LocalDateTime.now().atZone(ZoneId.of(timeZone))))
+                .orElse(true);
     }
 }

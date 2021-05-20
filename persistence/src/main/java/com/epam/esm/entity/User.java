@@ -8,10 +8,13 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +24,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Entity
@@ -47,6 +51,17 @@ public class User implements Serializable {
 
     @Column(name = "password")
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private UserStatus userStatus;
+
+    @Column(name = "attempt")
+    private int attempt;
+
+    @Nullable
+    @Column(name = "lock_date")
+    private ZonedDateTime lockDate;
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH})
     @LazyCollection(LazyCollectionOption.FALSE)

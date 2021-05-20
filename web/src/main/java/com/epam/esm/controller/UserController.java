@@ -67,7 +67,7 @@ public class UserController {
      * @return order id
      */
     @PostMapping("/{id}/orders")
-    @PreAuthorize("hasRole('EDITOR') or (hasRole('BUYER') and @authenticatedUserService.hasId(#id))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('BUYER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<GiftOrder> createOrder(@PathVariable @Min(value = 1) Long id,
                                                  @Valid @RequestBody List<GiftCertificate> giftCertificates) {
         return ResponseEntity.ok(userService.createUserOrder(id, giftCertificates));
@@ -109,7 +109,7 @@ public class UserController {
      * @return tag
      */
     @GetMapping("/{id}/tag")
-    @PreAuthorize("hasRole('EDITOR') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<EntityModel<GiftTag>> getMostPopularUserTag(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(resourceBuilder.getTagResource().toModel(userService.findMostPopularUserTag(id)));
     }
