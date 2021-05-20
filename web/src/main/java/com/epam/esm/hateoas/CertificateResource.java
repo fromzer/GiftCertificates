@@ -21,19 +21,8 @@ public class CertificateResource implements SimpleRepresentationModelAssembler<G
     @Override
     public void addLinks(EntityModel<GiftCertificate> resource) {
         resource.add(linkTo(methodOn(CertificateController.class).getCertificateById(Objects.requireNonNull(resource.getContent()).getId())).withSelfRel());
-//        if (resource.getContent().getTags() != null) {
-//            addTagLinks(resource);
-//        }
     }
-//
-//    private void addTagLinks(EntityModel<GiftCertificate> resource) {
-//        for (final GiftTag tag : resource.getContent().getTags()) {
-//            Link getTagById = linkTo(methodOn(TagController.class).getTagById(tag.getId())).withSelfRel();
-//            if (!tag.getLinks().contains(getTagById)) {
-//                tag.add(getTagById);
-//            }
-//        }
-//    }
+
 
     @Override
     public void addLinks(CollectionModel<EntityModel<GiftCertificate>> resources) {

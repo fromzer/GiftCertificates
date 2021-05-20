@@ -5,7 +5,10 @@ import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Role;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
+import com.epam.esm.entity.UserStatus;
 import com.epam.esm.exception.EntityRetrievalException;
+import com.epam.esm.exception.LoginExistsException;
+import com.epam.esm.exception.PasswordMismatchException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.mapper.CertificateMapper;
 import com.epam.esm.mapper.RegisteredUserMapper;
@@ -86,6 +89,7 @@ class UserServiceImplTest {
         roles.add(roleViewer);
         createAndFindUser.setId(1L);
         createAndFindUser.setRoles(roles);
+        createAndFindUser.setUserStatus(UserStatus.ACTIVE);
         GiftCertificateServiceImpl certificateService = new GiftCertificateServiceImpl(certificateRepository, tagRepository);
         orderService = new OrderServiceImpl(orderRepository, certificateService, userRepository);
         userService = new UserServiceImpl(orderService, userRepository, orderRepository, tagRepository, roleRepository);
@@ -189,6 +193,16 @@ class UserServiceImplTest {
         when(userRepository.save(any())).thenReturn(createAndFindUser);
         UserGift userGift = userService.createUser(registeredUser);
         assertEquals(userGift.getLogin(), registeredUser.getLogin());
+    }
+    @Test
+    void userIsExist() {
+        when(userRepository.existsByLogin(any())).thenReturn(true);
+        assertThrows(LoginExistsException.class, () -> userService.createUser(registeredUser));
+    }
+    @Test
+    void shouldNotCreateUserPasswordMismatch() {
+        registeredUser.setRepeatPassword("repeat");
+        assertThrows(PasswordMismatchException.class, () -> userService.createUser(registeredUser));
     }
 
     @Test

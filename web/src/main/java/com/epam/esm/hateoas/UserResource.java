@@ -21,7 +21,7 @@ public class UserResource implements SimpleRepresentationModelAssembler<UserGift
     @Override
     public void addLinks(EntityModel<UserGift> resource) {
         resource.add(linkTo(methodOn(UserController.class).getUserById(resource.getContent().getId())).withSelfRel());
-//        resource.add(linkTo(methodOn(UserController.class).getUserOrders(resource.getContent().getId(), null)).withRel(GET_ORDERS));
+        resource.add(linkTo(methodOn(UserController.class).getUserOrders(resource.getContent().getId(), null)).withRel(GET_ORDERS));
         resource.add(linkTo(methodOn(UserController.class).createOrder(resource.getContent().getId(), null)).withRel(MAKE_ORDERS));
     }
 

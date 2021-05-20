@@ -2,11 +2,11 @@ package com.epam.esm.service;
 
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
-import com.epam.esm.model.ModifiedGiftCertificate;
-import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
+import com.epam.esm.model.ModifiedGiftCertificate;
+import com.epam.esm.model.SearchAndSortCertificateParams;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public interface GiftCertificateService {
     /**
      * Update entity
      *
-     * @param giftCertificate an DTO of business model
+     * @param modifiedGiftCertificate an DTO of business model
      * @return updated GiftCertificate
      * @throws UpdateResourceException if fail to update data
      */

@@ -5,12 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Range;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor

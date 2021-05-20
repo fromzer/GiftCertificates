@@ -78,9 +78,26 @@ public interface UserService extends UserDetailsService {
      */
     GiftOrder createUserOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
 
+    /**
+     * Create user
+     *
+     * @param registeredUser user dto for registration
+     * @return userGift
+     */
     UserGift createUser(RegisteredUser registeredUser);
 
+    /**
+     * Get user by login
+     *
+     * @param login user login
+     * @return user
+     */
     User findUserByLogin(String login);
 
+    /**
+     * Change value login attempts and lock date
+     *
+     * @param login user login
+     */
     void changeValueLoginAttemptsAndLockDate(String login);
 }
