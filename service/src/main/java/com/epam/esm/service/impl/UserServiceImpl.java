@@ -1,5 +1,6 @@
 package com.epam.esm.service.impl;
 
+import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Role;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserStatus;
@@ -27,6 +28,8 @@ import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -77,10 +80,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException {
-        return userRepository.findAll(pageable).stream()
+    public Page<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException {
+        Page<User> all = userRepository.findAll(pageable);
+        List<UserGift> userGiftList = all.get()
                 .map(UserMapper.USER_MAPPER::userToUserGift)
                 .collect(Collectors.toList());
+        return new PageImpl<>(userGiftList, pageable, all.getTotalElements());
     }
 
     @Override
@@ -94,12 +99,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<GiftOrder> findUserOrders(Long id, Pageable pageable) {
+    public Page<GiftOrder> findUserOrders(Long id, Pageable pageable) {
         userRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
-        return orderRepository.findByUserId(id, pageable).stream()
+        Page<Order> byUserId = orderRepository.findByUserId(id, pageable);
+        List<GiftOrder> giftOrders = byUserId.get()
                 .map(OrderMapper.ORDER_MAPPER::orderToGiftOrder)
                 .collect(Collectors.toList());
+        return new PageImpl<>(giftOrders, pageable, byUserId.getTotalElements());
     }
 
     @Override

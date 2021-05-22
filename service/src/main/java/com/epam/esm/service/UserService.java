@@ -9,6 +9,7 @@ import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
 import com.epam.esm.model.RegisteredUser;
 import com.epam.esm.model.UserGift;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -37,7 +38,7 @@ public interface UserService extends UserDetailsService {
      * @return list of users
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException;
 
     /**
      * Get user order
@@ -57,7 +58,7 @@ public interface UserService extends UserDetailsService {
      * @return list of user orders
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<GiftOrder> findUserOrders(Long id, Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftOrder> findUserOrders(Long id, Pageable pageable) throws ResourceNotFoundException;
 
     /**
      * Get the most popular user tag

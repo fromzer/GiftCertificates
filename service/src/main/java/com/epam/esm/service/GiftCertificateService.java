@@ -7,9 +7,8 @@ import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.ModifiedGiftCertificate;
 import com.epam.esm.model.SearchAndSortCertificateParams;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 /**
  * Base interface for Certificate Service
@@ -49,7 +48,7 @@ public interface GiftCertificateService {
      * @return List of entities
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException;
 
     /**
      * Update entity
@@ -68,5 +67,5 @@ public interface GiftCertificateService {
      * @return list of GiftCertificates
      * @throws ResourceNotFoundException if fail to retrieve data
      */
-    List<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException;
 }

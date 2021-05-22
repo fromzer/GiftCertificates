@@ -4,6 +4,8 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.repository.CertificateRepositoryCustom;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -34,17 +36,19 @@ public class CertificateRepositoryCustomImpl implements CertificateRepositoryCus
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public List<Certificate> findByParams(SearchAndSortCertificateParams params, Pageable pageable) {
+    public Page<Certificate> findByParams(SearchAndSortCertificateParams params, Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Certificate> cr = cb.createQuery(Certificate.class);
         Root<Certificate> root = cr.from(Certificate.class);
         Predicate predicateSearchParams = createPredicate(params, cb, root);
         createQuery(params, cb, cr, root, predicateSearchParams);
         Query query = entityManager.createQuery(cr);
+        int totalRows = query.getResultList().size();
         query.setFirstResult(pageable.getPageNumber());
         query.setMaxResults(pageable.getPageSize());
         List<Certificate> resultList = query.getResultList();
-        return resultList.stream().distinct().collect(Collectors.toList());
+        List<Certificate> distinctResult = resultList.stream().distinct().collect(Collectors.toList());
+        return new PageImpl<>(distinctResult, pageable, totalRows);
     }
 
     private Predicate createPredicate(SearchAndSortCertificateParams params, CriteriaBuilder cb, Root<Certificate> root) {

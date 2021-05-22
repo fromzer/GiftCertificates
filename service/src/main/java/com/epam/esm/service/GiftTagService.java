@@ -5,9 +5,8 @@ import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftTag;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 /**
  * Base interface for Tag Service
@@ -57,5 +56,5 @@ public interface GiftTagService {
      * @return List of entities
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException;
 }

@@ -22,6 +22,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,23 +101,27 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException {
-        return certificateRepository.findAll(pageable).get()
+    public Page<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException {
+        Page<Certificate> certificates = certificateRepository.findAll(pageable);
+        List<GiftCertificate> giftCertificates = certificates.get()
                 .map(CertificateMapper.CERTIFICATE_MAPPER::certificateToGiftCertificate)
                 .collect(Collectors.toList());
+        return new PageImpl<>(giftCertificates, pageable, certificates.getTotalElements());
     }
 
     @Override
-    public List<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException {
+    public Page<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException {
         try {
-            List<GiftCertificate> giftCertificates;
+            Page<GiftCertificate> giftCertificates;
             if (isAllParamsEmpty(params)) {
                 giftCertificates = findAll(pageable);
             } else {
-                giftCertificates = certificateRepository
-                        .findByParams(params, pageable).stream()
+                Page<Certificate> byParams = certificateRepository
+                        .findByParams(params, pageable);
+                List<GiftCertificate> giftCertificateList = byParams.get()
                         .map(CertificateMapper.CERTIFICATE_MAPPER::certificateToGiftCertificate)
                         .collect(Collectors.toList());
+                giftCertificates = new PageImpl<>(giftCertificateList, pageable, byParams.getTotalElements());
             }
             return giftCertificates;
         } catch (EntityRetrievalException e) {

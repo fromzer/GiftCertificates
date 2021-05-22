@@ -10,6 +10,8 @@ import com.epam.esm.model.GiftTag;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.GiftTagService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,10 +62,12 @@ public class GiftTagServiceImpl implements GiftTagService {
     }
 
     @Override
-    public List<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException {
-        return tagRepository.findAll(pageable).get()
+    public Page<GiftTag> findAll(Pageable pageable) throws ResourceNotFoundException {
+        Page<Tag> all = tagRepository.findAll(pageable);
+        List<GiftTag> collect = all.get()
                 .map(TagMapper.TAG_MAPPER::tagToGiftTag)
                 .collect(Collectors.toList());
+        return new PageImpl<>(collect, pageable, all.getTotalElements());
     }
 
     private void isTagExist(GiftTag entity) {

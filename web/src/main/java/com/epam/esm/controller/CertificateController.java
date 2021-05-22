@@ -1,14 +1,15 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.hateoas.CertificateResource;
+import com.epam.esm.hateoas.HateoasResourceBuilder;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.ModifiedGiftCertificate;
 import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.service.GiftCertificateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,14 +36,13 @@ import javax.validation.constraints.Min;
 @RequestMapping(value = "/api/v1/certificates", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class CertificateController {
     private final GiftCertificateService giftCertificateService;
-    private final CertificateResource certificateResource;
+    private final HateoasResourceBuilder resourceBuilder;
 
     @Autowired
     public CertificateController(
-            GiftCertificateService giftCertificateService,
-            CertificateResource certificateResource) {
+            GiftCertificateService giftCertificateService, HateoasResourceBuilder resourceBuilder) {
         this.giftCertificateService = giftCertificateService;
-        this.certificateResource = certificateResource;
+        this.resourceBuilder = resourceBuilder;
     }
 
     /**
@@ -92,7 +92,8 @@ public class CertificateController {
     @GetMapping("/{id}")
     @PreAuthorize("permitAll()")
     public ResponseEntity<EntityModel<GiftCertificate>> getCertificateById(@PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(certificateResource.toModel(giftCertificateService.findById(id)));
+        return ResponseEntity.ok(resourceBuilder.getCertificateResource()
+                .toModel(giftCertificateService.findById(id)));
     }
 
     /**
@@ -104,10 +105,12 @@ public class CertificateController {
      */
     @GetMapping
     @PreAuthorize("permitAll()")
-    public ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> getCertificatesWithParameters(
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<PagedModel<GiftCertificate>> getCertificatesWithParameters(
             @Valid @ModelAttribute SearchAndSortCertificateParams params, Pageable pageable) {
+        Page<GiftCertificate> certificateByParams = giftCertificateService.findCertificateByParams(params, pageable);
         return ResponseEntity
-                .ok(certificateResource.toCollectionModel(
-                        giftCertificateService.findCertificateByParams(params, pageable)));
+                .ok(resourceBuilder.getPagedResourcesAssembler()
+                        .toModel(certificateByParams, resourceBuilder.getCertificateResource()));
     }
 }
