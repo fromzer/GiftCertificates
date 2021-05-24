@@ -3,15 +3,20 @@ package com.epam.esm;
 import com.epam.esm.controller.UserController;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
+import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -24,9 +29,12 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,6 +55,8 @@ public class UserControllerTest {
     private UserController controller;
     @MockBean
     private UserService userService;
+    @Mock
+    private Pageable pageable;
     @Autowired
     private ObjectMapper objectMapper;
     private UserGift user;
@@ -83,6 +93,10 @@ public class UserControllerTest {
                 .cost(certificate.getPrice())
                 .purchaseDate(ZonedDateTime.now(ZoneId.systemDefault()))
                 .build();
+        GiftOrderWithoutCertificatesAndUser orderInfo = GiftOrderWithoutCertificatesAndUser.builder()
+                .cost(order.getCost())
+                .purchaseDate(order.getPurchaseDate())
+                .build();
     }
 
     @Test
@@ -107,27 +121,19 @@ public class UserControllerTest {
     @WithMockUser(roles = "ADMIN")
     @Test
     public void shouldGetUsers() throws Exception {
+        Page<UserGift> userGiftPage = new PageImpl<>(Stream.of(user).collect(Collectors.toList()));
+        when(userService.findAll(any())).thenReturn(userGiftPage);
         mockMvc.perform(get("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
-//    @WithMockUser(roles = "BUYER")
-//    @Test
-//    public void shouldCreateUserOrder() throws Exception {
-//        when(userService.findById(any())).thenReturn(user);
-//        when(userService.createUserOrder(anyLong(), any())).thenReturn(any());
-//        mockMvc.perform(
-//                post("/api/v1/users/{id}/orders", user.getId())
-//                        .content(objectMapper.writeValueAsString(certificates))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk());
-//    }
-
     @WithMockUser(roles = "ADMIN")
     @Test
     public void shouldGetUserOrders() throws Exception {
+        Page<GiftOrder> giftOrderPage = new PageImpl<>(Stream.of(order).collect(Collectors.toList()));
+        when(userService.findUserOrders(anyLong(), any())).thenReturn(giftOrderPage);
         mockMvc.perform(get("/api/v1/users/{id}/orders", user.getId())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

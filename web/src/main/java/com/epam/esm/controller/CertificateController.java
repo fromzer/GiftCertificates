@@ -90,7 +90,6 @@ public class CertificateController {
      * @return the certificate
      */
     @GetMapping("/{id}")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<EntityModel<GiftCertificate>> getCertificateById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(resourceBuilder.getCertificateResource()
                 .toModel(giftCertificateService.findById(id)));
@@ -104,7 +103,6 @@ public class CertificateController {
      * @return list of certificates
      */
     @GetMapping
-    @PreAuthorize("permitAll()")
     @SuppressWarnings("unchecked")
     public ResponseEntity<PagedModel<GiftCertificate>> getCertificatesWithParameters(
             @Valid @ModelAttribute SearchAndSortCertificateParams params, Pageable pageable) {

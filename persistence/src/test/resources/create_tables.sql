@@ -45,10 +45,13 @@ create table user
 (
     id         bigint auto_increment
         primary key,
-    login      varchar(30)  not null,
-    first_name varchar(30)  not null,
-    last_name  varchar(50)  not null,
-    password   varchar(255) not null,
+    login      varchar(30)                  not null,
+    first_name varchar(30)                  not null,
+    last_name  varchar(50)                  not null,
+    password   varchar(255)                 not null,
+    status     varchar(20) default 'ACTIVE' not null,
+    attempt    int         default 0        not null,
+    lock_date  timestamp                    null,
     constraint login
         unique (login)
 );

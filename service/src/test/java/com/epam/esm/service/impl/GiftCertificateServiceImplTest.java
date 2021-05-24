@@ -215,7 +215,7 @@ class GiftCertificateServiceImplTest {
         certificateDTOList.add(correctCertificate);
         Page<Certificate> certificates = new PageImpl<Certificate>(certificateDTOList);
         when(certificateRepository.findAll(pageable)).thenReturn(certificates);
-        assertEquals(1, giftCertificateService.findAll(pageable).size());
+        assertEquals(1, giftCertificateService.findAll(pageable).getContent().size());
     }
 
     @Test
@@ -240,9 +240,10 @@ class GiftCertificateServiceImplTest {
                 .build();
         List<Certificate> certificateDTOList = new ArrayList<>();
         certificateDTOList.add(certificateDTO);
-        when(certificateRepository.findByParams(any(SearchAndSortCertificateParams.class), any())).thenReturn(certificateDTOList);
+        Page<Certificate> certificatePage = new PageImpl<>(certificateDTOList);
+        when(certificateRepository.findByParams(any(SearchAndSortCertificateParams.class), any())).thenReturn(certificatePage);
         SearchAndSortCertificateParams options = new SearchAndSortCertificateParams("moto", null, null, null);
-        GiftCertificate giftCertificateFindByTag = giftCertificateService.findCertificateByParams(options, null).get(0);
+        GiftCertificate giftCertificateFindByTag = giftCertificateService.findCertificateByParams(options, pageable).getContent().get(0);
         boolean containTag = giftCertificateFindByTag.getTags().contains(giftTag);
         assertEquals(containTag, true);
     }
@@ -265,9 +266,10 @@ class GiftCertificateServiceImplTest {
                 .build();
         List<Certificate> certificateDTOList = new ArrayList<>();
         certificateDTOList.add(certificateDTO);
-        when(certificateRepository.findByParams(any(SearchAndSortCertificateParams.class), any())).thenReturn(certificateDTOList);
+        Page<Certificate> certificatePage = new PageImpl<>(certificateDTOList);
+        when(certificateRepository.findByParams(any(SearchAndSortCertificateParams.class), any())).thenReturn(certificatePage);
         SearchAndSortCertificateParams options = new SearchAndSortCertificateParams(null, "Hello", null, null);
-        GiftCertificate giftCertificateFindByName = giftCertificateService.findCertificateByParams(options, null).get(0);
+        GiftCertificate giftCertificateFindByName = giftCertificateService.findCertificateByParams(options, pageable).getContent().get(0);
         boolean findByName = giftCertificateFindByName.getName().equals("Hello");
         assertEquals(findByName, true);
     }
@@ -290,9 +292,10 @@ class GiftCertificateServiceImplTest {
                 .build();
         List<Certificate> certificateDTOList = new ArrayList<>();
         certificateDTOList.add(certificateDTO);
-        when(certificateRepository.findByParams(any(SearchAndSortCertificateParams.class), any())).thenReturn(certificateDTOList);
+        Page<Certificate> certificatePage = new PageImpl<>(certificateDTOList);
+        when(certificateRepository.findByParams(any(SearchAndSortCertificateParams.class), any())).thenReturn(certificatePage);
         SearchAndSortCertificateParams options = new SearchAndSortCertificateParams(null, null, "World", null);
-        GiftCertificate giftCertificateFindByName = giftCertificateService.findCertificateByParams(options, null).get(0);
+        GiftCertificate giftCertificateFindByName = giftCertificateService.findCertificateByParams(options, pageable).getContent().get(0);
         boolean findByDescription = giftCertificateFindByName.getDescription().equals("World");
         assertEquals(findByDescription, true);
     }

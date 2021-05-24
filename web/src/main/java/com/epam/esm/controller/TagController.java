@@ -73,7 +73,6 @@ public class TagController {
      * @return the tag
      */
     @GetMapping("/{id}")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<EntityModel<GiftTag>> getTagById(@PathVariable @Min(value = 1) Long id) {
         return ResponseEntity.ok(resourceBuilder.getGiftTagResource().toModel(tagService.findById(id)));
     }
@@ -85,7 +84,6 @@ public class TagController {
      * @return List of GiftTags
      */
     @GetMapping
-    @PreAuthorize("permitAll()")
     @SuppressWarnings("unchecked")
     public ResponseEntity<PagedModel<GiftTag>> getAll(Pageable pageable) {
         Page<GiftTag> all = tagService.findAll(pageable);

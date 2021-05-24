@@ -37,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -62,7 +63,7 @@ class UserServiceImplTest {
     private Pageable pageable;
     private OrderServiceImpl orderService;
     private User excepted;
-    private List<Order> orders;
+    private Page<Order> orders;
     private Order order;
     private Certificate certificate;
     private List<Certificate> certificates;
@@ -123,8 +124,7 @@ class UserServiceImplTest {
                 .cost(certificate.getPrice())
                 .purchaseDate(ZonedDateTime.now(ZoneId.systemDefault()))
                 .build();
-        orders = new ArrayList<>();
-        orders.add(order);
+        orders = new PageImpl<>(Stream.of(order).collect(Collectors.toList()));
     }
 
     @Test
@@ -157,7 +157,7 @@ class UserServiceImplTest {
         users.add(excepted);
         Page<User> userPage = new PageImpl<>(users);
         when(userRepository.findAll(pageable)).thenReturn(userPage);
-        assertEquals(1, userService.findAll(pageable).size());
+        assertEquals(1, userService.findAll(pageable).getContent().size());
     }
 
     @Test
@@ -171,8 +171,8 @@ class UserServiceImplTest {
     void shouldFindUserOrders() {
         when(userRepository.findById(any())).thenReturn(java.util.Optional.ofNullable(user));
         when(orderRepository.findByUserId(any(), any())).thenReturn(orders);
-        List<GiftOrder> actual = userService.findUserOrders(user.getId(), null);
-        assertEquals(orders.get(0).getId(), actual.get(0).getId());
+        Page<GiftOrder> actual = userService.findUserOrders(user.getId(), pageable);
+        assertEquals(orders.getContent().get(0).getId(), actual.getContent().get(0).getId());
     }
 
     @Test

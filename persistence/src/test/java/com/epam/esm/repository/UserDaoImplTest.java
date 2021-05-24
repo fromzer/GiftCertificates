@@ -1,6 +1,7 @@
 package com.epam.esm.repository;
 
 import com.epam.esm.entity.User;
+import com.epam.esm.entity.UserStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -34,6 +35,8 @@ class UserDaoImplTest {
             .firstName("Test")
             .lastName("Testov")
             .password("test")
+            .userStatus(UserStatus.ACTIVE)
+            .attempt(0)
             .build();
 
     @BeforeEach

@@ -99,6 +99,6 @@ class GiftTagServiceImplTest {
         tagDTOList.add(correctTag);
         Page<Tag> tagPage = new PageImpl<>(tagDTOList);
         when(tagRepository.findAll((Pageable) any())).thenReturn(tagPage);
-        assertEquals(1, giftTagService.findAll(pageable).size());
+        assertEquals(1, giftTagService.findAll(pageable).getContent().size());
     }
 }

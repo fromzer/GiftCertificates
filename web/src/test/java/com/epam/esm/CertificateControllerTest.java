@@ -1,6 +1,7 @@
 package com.epam.esm;
 
 import com.epam.esm.controller.CertificateController;
+import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftTag;
 import com.epam.esm.model.ModifiedGiftCertificate;
@@ -10,13 +11,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,12 +26,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,6 +55,10 @@ public class CertificateControllerTest {
     private ObjectMapper objectMapper;
     @Autowired
     private CertificateController controller;
+    @Mock
+    private Pageable pageable;
+    @Mock
+    private SearchAndSortCertificateParams params;
     @MockBean
     private GiftCertificateService certificateService;
     private GiftCertificate certificate;
@@ -108,7 +112,7 @@ public class CertificateControllerTest {
                 .andExpect(jsonPath("$.duration").value(certificate.getDuration()));
     }
 
-    @WithMockUser(roles = "EDITOR")
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void shouldCreateCertificate() throws Exception {
         when(certificateService.create(any())).thenReturn(any());
@@ -119,7 +123,7 @@ public class CertificateControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @WithMockUser(roles = "EDITOR")
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void shouldUpdateCertificate() throws Exception {
         when(certificateService.update(any(), anyLong())).thenReturn(certificate);
@@ -130,7 +134,7 @@ public class CertificateControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @WithMockUser(roles = "EDITOR")
+    @WithMockUser(roles = "ADMIN")
     @Test
     public void shouldDeleteCertificate() throws Exception {
         when(certificateService.findById(any())).thenReturn(certificate);
@@ -139,33 +143,10 @@ public class CertificateControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    @WithMockUser(roles = "VIEWER")
-    @Test
-    public void shouldGetAllCertificates() {
-        SearchAndSortCertificateParams params = new SearchAndSortCertificateParams(null, null, null, null);
-        GiftCertificate giftCertificateFirst = certificate;
-        GiftCertificate giftCertificateSecond = GiftCertificate.builder()
-                .id(1L)
-                .name("new NAME")
-                .description("car")
-                .price(BigDecimal.valueOf(11.00))
-                .duration(7)
-                .build();
-        List<GiftCertificate> giftCertificates = new ArrayList<>();
-        giftCertificates.add(giftCertificateFirst);
-        giftCertificates.add(giftCertificateSecond);
-        when(certificateService.findCertificateByParams(params, null)).thenReturn(giftCertificates);
-        ResponseEntity<CollectionModel<EntityModel<GiftCertificate>>> certificates = controller.getCertificatesWithParameters(params, null);
-        List<GiftCertificate> collect = Objects.requireNonNull(certificates.getBody()).getContent().stream()
-                .map(EntityModel::getContent)
-                .collect(Collectors.toList());
-        assertThat(collect.size()).isEqualTo(giftCertificates.size());
-        assertThat(collect.get(1).getName()).isEqualTo(giftCertificates.get(1).getName());
-        assertThat(collect.get(0).getName()).isEqualTo(giftCertificates.get(0).getName());
-    }
-
     @Test
     public void shouldGetCertificates() throws Exception {
+        Page<GiftCertificate> certificatePage = new PageImpl<>(Stream.of(certificate).collect(Collectors.toList()));
+        when(certificateService.findCertificateByParams(any(), any())).thenReturn(certificatePage);
         mockMvc.perform(get("/api/v1/certificates")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -174,6 +155,7 @@ public class CertificateControllerTest {
 
     @Test
     public void notFoundCertificateById() throws Exception {
+        when(certificateService.findById(any())).thenThrow(ResourceNotFoundException.class);
         mockMvc.perform(get("/api/v1/certificates/{id}", 1000L)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

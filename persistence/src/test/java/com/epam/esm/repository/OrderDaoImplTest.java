@@ -4,6 +4,7 @@ import com.epam.esm.entity.Certificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
+import com.epam.esm.entity.UserStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -55,6 +56,8 @@ class OrderDaoImplTest {
             .firstName("Test")
             .lastName("Testov")
             .password("test")
+            .attempt(0)
+            .userStatus(UserStatus.ACTIVE)
             .build();
     private Order order = Order.builder()
             .user(user)
