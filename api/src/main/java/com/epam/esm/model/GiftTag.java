@@ -17,6 +17,6 @@ import javax.validation.constraints.Pattern;
 public class GiftTag extends RepresentationModel<GiftTag> {
     private Long id;
 
-    @Pattern(regexp = "[A-Za-zА-Яа-яЁё \\-]{1,50}", message = "validate.tagName")
+    @Pattern(regexp = ".{1,50}", message = "validate.tagName")
     private String name;
 }

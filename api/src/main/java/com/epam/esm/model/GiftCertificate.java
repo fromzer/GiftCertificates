@@ -24,11 +24,11 @@ public class GiftCertificate extends RepresentationModel<GiftCertificate> {
     private Long id;
 
     @NotBlank(message = "validate.emptyField")
-    @Pattern(regexp = "[A-Za-zА-Яа-яЁё \\-]{1,50}", message = "validate.certificate.name")
+    @Pattern(regexp = ".{1,50}", message = "validate.certificate.name")
     private String name;
 
     @NotBlank(message = "validate.emptyField")
-    @Pattern(regexp = "[A-Za-zА-Яа-яЁё \\-]{1,500}", message = "validate.certificate.description")
+    @Pattern(regexp = ".{1,500}", message = "validate.certificate.description")
     private String description;
 
     @NotNull(message = "validate.emptyField")

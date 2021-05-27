@@ -14,7 +14,7 @@ import javax.validation.constraints.Pattern;
 @Builder
 public class RegisteredUser {
     @NotBlank(message = "validate.emptyField")
-    @Pattern(regexp = "[A-Za-zА-Яа-яЁё \\-]{1,30}", message = "validate.login")
+    @Pattern(regexp = "[A-Za-zА-Яа-яЁё0-9@#&*\\-.]{1,30}", message = "validate.login")
     private String login;
 
     @NotBlank(message = "validate.emptyField")
