@@ -22,10 +22,10 @@ import java.util.Properties;
 @EnableTransactionManagement
 public class DataConfiguration {
     private final static String PACKAGE_TO_SCAN = "com.epam.esm.entity";
-    private final static String HIBERNATE_DIALECT ="hibernate.dialect";
-    private final static String HIBERNATE_FORMAT_SQL ="hibernate.format_sql";
-    private final static String HIBERNATE_SHOW_SQL ="hibernate.show_sql";
-    private final static String HIBERNATE_HBM2DDL_AUTO ="hibernate.hbm2ddl.auto";
+    private final static String HIBERNATE_DIALECT = "hibernate.dialect";
+    private final static String HIBERNATE_FORMAT_SQL = "hibernate.format_sql";
+    private final static String HIBERNATE_SHOW_SQL = "hibernate.show_sql";
+    private final static String HIBERNATE_HBM2DDL_AUTO = "hibernate.hbm2ddl.auto";
     @Value("${spring.datasource.driver-class-name}")
     private String driverName;
     @Value("${spring.datasource.url}")
@@ -56,7 +56,6 @@ public class DataConfiguration {
         return new HikariDataSource(jdbcConfig);
     }
 
-
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em
@@ -79,7 +78,7 @@ public class DataConfiguration {
     }
 
     @Bean
-    public PlatformTransactionManager getTransactionManager(EntityManagerFactory entityManagerFactory) {
+    public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory);
         return transactionManager;

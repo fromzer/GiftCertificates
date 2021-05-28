@@ -8,11 +8,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -23,10 +24,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String CREATE_RESOURCE_MESSAGE = "exception.createResource";
-    private static final String DELETE_RESOURCE_MESSAGE = "exception.deleteResource";
     private static final String RESOURCE_NOT_FOUND_MESSAGE = "exception.resourceNotFound";
     private static final String INVALID_PARAMS_MESSAGE = "exception.invalidParams";
     private static final String RESOURCE_IS_EXIST_MESSAGE = "exception.resourceIsExist";
@@ -35,9 +35,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String INTERNAL_SERVER_ERROR_MESSAGE = "exception.internalServer";
     private static final String METHOD_NOT_SUPPORTED = "exception.methodNotSupported";
     private static final String NOT_VALID_VALUE = "exception.notValidValue";
+    private static final String INVALID_LOGIN = "exception.notValidLogin";
+    private static final String TOKEN_NOT_VALID = "exception.tokenNotValid";
+    private static final String LOGIN_EXIST_MESSAGE = "exception.loginExist";
+    private static final String ACCESS_DENIED = "exception.accessDenied";
+    private static final String PASSWORD_MISMATCH = "exception.passwordMismatch";
+    private static final String INVALID_PASSWORD = "exception.invalidPassword";
+
     private final MessageSource messageSource;
     private final Locale defaultLocale = Locale.getDefault();
-
 
     @Autowired
     public RestExceptionHandler(MessageSource messageSource) {
@@ -51,11 +57,52 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = DeleteResourceException.class)
-    protected ResponseEntity<ErrorMessage> handleDeleteResourceException(Locale locale) {
-        String msg = messageSource.getMessage(DELETE_RESOURCE_MESSAGE, null, locale);
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.NOT_FOUND.value(), msg, "40417");
-        return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(value = JwtAuthenticationException.class)
+    protected ResponseEntity<ErrorMessage> handleJwtAuthenticationException(Locale locale) {
+        String msg = messageSource.getMessage(TOKEN_NOT_VALID, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(), msg, "40101");
+        return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(value = LoginExistsException.class)
+    protected ResponseEntity<ErrorMessage> handleLoginExistsException(Locale locale) {
+        String msg = messageSource.getMessage(LOGIN_EXIST_MESSAGE, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.CONFLICT.value(), msg, "40901");
+        return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = UserBlockedException.class)
+    protected ResponseEntity<ErrorMessage> handleUserBlockedException(UserBlockedException exception) {
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), exception.getLocalizedMessage(), "40308");
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = BadPasswordException.class)
+    protected ResponseEntity<ErrorMessage> handleBadPasswordException(Locale locale) {
+        String msg = messageSource.getMessage(INVALID_PASSWORD, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40306");
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = UserNotFoundException.class)
+    protected ResponseEntity<ErrorMessage> handleUserNotFoundException(Locale locale) {
+        String msg = messageSource.getMessage(INVALID_LOGIN, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40309");
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    protected ResponseEntity<ErrorMessage> handleAccessDeniedException(Locale locale) {
+        String msg = messageSource.getMessage(ACCESS_DENIED, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40302");
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(value = PasswordMismatchException.class)
+    protected ResponseEntity<ErrorMessage> handlePasswordMismatchException(Locale locale) {
+        String msg = messageSource.getMessage(PASSWORD_MISMATCH, null, locale);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(), msg, "40107");
+        return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = {ResourceNotFoundException.class, EntityRetrievalException.class})
@@ -113,6 +160,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 .getAllErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .map(s -> messageSource.getMessage(s, null, defaultLocale))
                 .collect(Collectors.toList());
         body.put("errorMessage", errors);
         body.put("errorCode", status.value() + "" + (status.value() / 10));

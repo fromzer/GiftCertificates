@@ -33,9 +33,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = "orders", callSuper=false)
+@EqualsAndHashCode(exclude = "orders")
 @ToString(exclude = "orders")
-public class Certificate extends PersistentObject implements Serializable {
+public class Certificate implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

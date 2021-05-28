@@ -5,20 +5,18 @@ import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
 import com.epam.esm.model.UserGift;
 import com.epam.esm.service.UserService;
+import com.epam.esm.service.impl.AuthenticatedUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.hateoas.CollectionModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Validator;
-import org.springframework.web.bind.WebDataBinder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,29 +37,15 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/users", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class UserController {
     private final UserService userService;
-    private final Validator certificateValidator;
-    private final Validator pageableValidator;
     private final HateoasResourceBuilder resourceBuilder;
+    private final AuthenticatedUserService authenticatedUserService;
 
     @Autowired
     public UserController(UserService userService,
-                          @Qualifier("certificateValidator") Validator certificateValidator,
-                          @Qualifier("pageableValidator") Validator pageableValidator,
-                          HateoasResourceBuilder resourceBuilder) {
+                          HateoasResourceBuilder resourceBuilder, AuthenticatedUserService authenticatedUserService) {
         this.userService = userService;
-        this.certificateValidator = certificateValidator;
-        this.pageableValidator = pageableValidator;
         this.resourceBuilder = resourceBuilder;
-    }
-
-    @InitBinder("certificate")
-    public void initCertificateBinder(WebDataBinder binder) {
-        binder.addValidators(certificateValidator);
-    }
-
-    @InitBinder("pageable")
-    public void initPageableBinder(WebDataBinder binder) {
-        binder.addValidators(pageableValidator);
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     /**
@@ -71,8 +55,10 @@ public class UserController {
      * @return user
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<EntityModel<UserGift>> getUserById(@PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(resourceBuilder.getUserResource().toModel(userService.findById(id)));
+        return ResponseEntity.ok(resourceBuilder.getUserResource()
+                .toModel(userService.findById(id)));
     }
 
     /**
@@ -83,8 +69,9 @@ public class UserController {
      * @return order id
      */
     @PostMapping("/{id}/orders")
-    public ResponseEntity<Long> createOrder(@PathVariable @Min(value = 1) Long id,
-                                            @Valid @RequestBody List<GiftCertificate> giftCertificates) {
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('BUYER') and @authenticatedUserService.hasId(#id))")
+    public ResponseEntity<GiftOrder> createOrder(@PathVariable @Min(value = 1) Long id,
+                                                 @Valid @RequestBody List<GiftCertificate> giftCertificates) {
         return ResponseEntity.ok(userService.createUserOrder(id, giftCertificates));
     }
 
@@ -96,10 +83,13 @@ public class UserController {
      * @return list of user orders
      */
     @GetMapping("/{id}/orders")
-    public ResponseEntity<CollectionModel<EntityModel<GiftOrder>>> getUserOrders(@PathVariable @Min(value = 1) Long id,
-                                                                                 @Valid @ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(resourceBuilder.getOrderResource().toCollectionModel(
-                userService.findUserOrders(id, pageable)));
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<PagedModel<GiftOrder>> getUserOrders(@PathVariable @Min(value = 1) Long id,
+                                                               Pageable pageable) {
+        Page<GiftOrder> userOrders = userService.findUserOrders(id, pageable);
+        return ResponseEntity.ok(resourceBuilder.getPagedResourcesAssembler()
+                .toModel(userOrders, resourceBuilder.getGiftOrderResource()));
     }
 
     /**
@@ -110,6 +100,7 @@ public class UserController {
      * @return user order
      */
     @GetMapping("/{id}/orders/{orderId}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<GiftOrderWithoutCertificatesAndUser> getUserOrder(@PathVariable @Min(value = 1) Long id,
                                                                             @PathVariable @Min(value = 1) Long orderId) {
         return ResponseEntity.ok(userService.findUserOrderInfo(orderId, id));
@@ -122,8 +113,10 @@ public class UserController {
      * @return tag
      */
     @GetMapping("/{id}/tag")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('VIEWER') and @authenticatedUserService.hasId(#id))")
     public ResponseEntity<EntityModel<GiftTag>> getMostPopularUserTag(@PathVariable @Min(value = 1) Long id) {
-        return ResponseEntity.ok(resourceBuilder.getTagResource().toModel(userService.findMostPopularUserTag(id)));
+        return ResponseEntity.ok(resourceBuilder.getGiftTagResource()
+                .toModel(userService.findMostPopularUserTag(id)));
     }
 
     /**
@@ -133,8 +126,11 @@ public class UserController {
      * @return list of users
      */
     @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<UserGift>>> getAll(@Valid @ModelAttribute Pageable pageable) {
-        return ResponseEntity.ok(resourceBuilder.getUserResource().toCollectionModel(
-                userService.findAll(pageable)));
+    @PreAuthorize("hasRole('ADMIN')")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<PagedModel<UserGift>> getAll(Pageable pageable) {
+        Page<UserGift> all = userService.findAll(pageable);
+        return ResponseEntity.ok(resourceBuilder.getPagedResourcesAssembler()
+                .toModel(all, resourceBuilder.getUserResource()));
     }
 }

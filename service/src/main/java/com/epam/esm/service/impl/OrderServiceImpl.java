@@ -1,14 +1,15 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.OrderDao;
-import com.epam.esm.dao.UserDao;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
+import com.epam.esm.mapper.OrderMapper;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.UserGift;
+import com.epam.esm.repository.OrderRepository;
+import com.epam.esm.repository.UserRepository;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.OrderService;
 import org.modelmapper.ModelMapper;
@@ -24,26 +25,27 @@ import java.util.stream.Collectors;
 @Transactional
 @Service
 public class OrderServiceImpl implements OrderService {
-    private final OrderDao orderDao;
-    private final UserDao userDao;
+    private final OrderRepository orderRepository;
     private final GiftCertificateService certificateService;
+    private final UserRepository userRepository;
     private ModelMapper mapper = new ModelMapper();
 
 
     @Autowired
-    public OrderServiceImpl(OrderDao orderDao, GiftCertificateService certificateService, UserDao userDao) {
-        this.orderDao = orderDao;
+    public OrderServiceImpl(OrderRepository orderRepository, GiftCertificateService certificateService, UserRepository userRepository) {
+        this.orderRepository = orderRepository;
         this.certificateService = certificateService;
-        this.userDao = userDao;
+        this.userRepository = userRepository;
     }
 
     @Transactional
     @Override
-    public Long createOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException {
-        return Optional.ofNullable(userDao.findById(userId))
-                .map(user -> buildGiftOrder(giftCertificates, user))
+    public GiftOrder createOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException {
+        return Optional.of(userRepository.findById(userId))
+                .map(user -> buildGiftOrder(giftCertificates, user.get()))
                 .map(order -> mapper.map(order, Order.class))
-                .map(orderDao::create)
+                .map(orderRepository::save)
+                .map(OrderMapper.ORDER_MAPPER::orderToGiftOrder)
                 .orElseThrow(ResourceNotFoundException::new);
     }
 

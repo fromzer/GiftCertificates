@@ -2,13 +2,13 @@ package com.epam.esm.service;
 
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.DeleteResourceException;
-import com.epam.esm.model.Pageable;
-import com.epam.esm.model.SearchAndSortCertificateParams;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.exception.UpdateResourceException;
 import com.epam.esm.model.GiftCertificate;
-
-import java.util.List;
+import com.epam.esm.model.ModifiedGiftCertificate;
+import com.epam.esm.model.SearchAndSortCertificateParams;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Base interface for Certificate Service
@@ -24,7 +24,7 @@ public interface GiftCertificateService {
      * @return entity id
      * @throws CreateResourceException if error is occurred during SQL command execution
      */
-    Long create(GiftCertificate giftCertificate) throws CreateResourceException;
+    GiftCertificate create(GiftCertificate giftCertificate) throws CreateResourceException;
 
     /**
      * Find entity
@@ -48,16 +48,16 @@ public interface GiftCertificateService {
      * @return List of entities
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftCertificate> findAll(Pageable pageable) throws ResourceNotFoundException;
 
     /**
      * Update entity
      *
-     * @param giftCertificate an DTO of business model
+     * @param modifiedGiftCertificate an DTO of business model
      * @return updated GiftCertificate
      * @throws UpdateResourceException if fail to update data
      */
-    GiftCertificate update(GiftCertificate giftCertificate, Long id) throws UpdateResourceException;
+    GiftCertificate update(ModifiedGiftCertificate modifiedGiftCertificate, Long id) throws UpdateResourceException;
 
     /**
      * Find entity
@@ -67,5 +67,5 @@ public interface GiftCertificateService {
      * @return list of GiftCertificates
      * @throws ResourceNotFoundException if fail to retrieve data
      */
-    List<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftCertificate> findCertificateByParams(SearchAndSortCertificateParams params, Pageable pageable) throws ResourceNotFoundException;
 }

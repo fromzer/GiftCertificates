@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 import java.math.BigDecimal;
@@ -14,7 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper=false)
+@ToString(exclude = "user")
+@EqualsAndHashCode(callSuper = false)
 @Builder
 public class GiftOrder extends RepresentationModel<GiftOrder> {
     private Long id;

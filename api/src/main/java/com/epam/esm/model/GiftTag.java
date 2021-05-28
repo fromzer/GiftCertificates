@@ -7,12 +7,16 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.RepresentationModel;
 
+import javax.validation.constraints.Pattern;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=false)
+@EqualsAndHashCode(callSuper = false)
 @Builder
 public class GiftTag extends RepresentationModel<GiftTag> {
     private Long id;
+
+    @Pattern(regexp = ".{1,50}", message = "validate.tagName")
     private String name;
 }

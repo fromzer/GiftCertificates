@@ -1,13 +1,17 @@
 package com.epam.esm.service;
 
+import com.epam.esm.entity.User;
 import com.epam.esm.exception.CreateResourceException;
 import com.epam.esm.exception.ResourceNotFoundException;
 import com.epam.esm.model.GiftCertificate;
 import com.epam.esm.model.GiftOrder;
 import com.epam.esm.model.GiftOrderWithoutCertificatesAndUser;
 import com.epam.esm.model.GiftTag;
-import com.epam.esm.model.Pageable;
+import com.epam.esm.model.RegisteredUser;
 import com.epam.esm.model.UserGift;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
@@ -17,7 +21,7 @@ import java.util.List;
  * @author Egor Miheev
  * @version 1.0.0
  */
-public interface UserService {
+public interface UserService extends UserDetailsService {
     /**
      * Get user by id
      *
@@ -34,7 +38,7 @@ public interface UserService {
      * @return list of users
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<UserGift> findAll(Pageable pageable) throws ResourceNotFoundException;
 
     /**
      * Get user order
@@ -54,7 +58,7 @@ public interface UserService {
      * @return list of user orders
      * @throws ResourceNotFoundException if fail to retrieve data from DB
      */
-    List<GiftOrder> findUserOrders(Long id, Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftOrder> findUserOrders(Long id, Pageable pageable) throws ResourceNotFoundException;
 
     /**
      * Get the most popular user tag
@@ -73,5 +77,28 @@ public interface UserService {
      * @return order id
      * @throws CreateResourceException if error is occurred during SQL command execution
      */
-    Long createUserOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
+    GiftOrder createUserOrder(Long userId, List<GiftCertificate> giftCertificates) throws CreateResourceException;
+
+    /**
+     * Create user
+     *
+     * @param registeredUser user dto for registration
+     * @return userGift
+     */
+    UserGift createUser(RegisteredUser registeredUser);
+
+    /**
+     * Get user by login
+     *
+     * @param login user login
+     * @return user
+     */
+    User findUserByLogin(String login);
+
+    /**
+     * Change value login attempts and lock date
+     *
+     * @param login user login
+     */
+    void changeValueLoginAttemptsAndLockDate(String login);
 }
