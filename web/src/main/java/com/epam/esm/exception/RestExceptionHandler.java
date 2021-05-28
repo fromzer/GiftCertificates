@@ -60,15 +60,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = JwtAuthenticationException.class)
     protected ResponseEntity<ErrorMessage> handleJwtAuthenticationException(Locale locale) {
         String msg = messageSource.getMessage(TOKEN_NOT_VALID, null, locale);
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.FORBIDDEN.value(), msg, "40301");
-        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.UNAUTHORIZED.value(), msg, "40101");
+        return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(value = LoginExistsException.class)
     protected ResponseEntity<ErrorMessage> handleLoginExistsException(Locale locale) {
         String msg = messageSource.getMessage(LOGIN_EXIST_MESSAGE, null, locale);
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.UNPROCESSABLE_ENTITY.value(), msg, "42201");
-        return new ResponseEntity<>(errorMessage, HttpStatus.UNPROCESSABLE_ENTITY);
+        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.CONFLICT.value(), msg, "40901");
+        return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = UserBlockedException.class)
