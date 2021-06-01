@@ -10,9 +10,6 @@ dependencies {
     testImplementation group: 'org.slf4j', name: 'slf4j-nop', version: slf4jVersion
     testImplementation group: 'com.h2database', name: 'h2', version: h2dbVersion
 }
-configurations.testCompile {
-    exclude group: 'ch.qos.logback', module: 'logback-classic'
-}
 
 bootJar {
     enabled = false
