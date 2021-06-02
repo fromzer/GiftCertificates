@@ -71,6 +71,7 @@ sonarqube {
         property('sonar.host.url', 'http://192.168.182.129:9000')
         property('sonar.login', 'admin')
         property('sonar.password', 'admin')
+        property 'sonar.coverage.jacoco.xmlReportPaths', "${project.buildDir}/reports/jacoco/report.xml"
     }
 }
 
