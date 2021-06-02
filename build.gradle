@@ -30,11 +30,6 @@ allprojects {
         testCompileOnly "org.projectlombok:lombok:$lombokVersion"
         testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
     }
-
-
-//    configurations.all {
-//        exclude group: 'ch.qos.logback', module: 'logback-classic'
-//    }
 }
 
 subprojects {

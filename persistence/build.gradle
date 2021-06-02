@@ -11,6 +11,11 @@ dependencies {
     testImplementation group: 'com.h2database', name: 'h2', version: h2dbVersion
 }
 
+configurations {
+    runtime.exclude group: 'ch.qos.logback', module: 'logback-classic'
+    compile.exclude group: 'ch.qos.logback', module: 'logback-classic'
+}
+
 bootJar {
     enabled = false
 }
