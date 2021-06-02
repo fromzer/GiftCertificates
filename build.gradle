@@ -1,12 +1,14 @@
 plugins {
     id 'org.springframework.boot' version "$springBootVersion"
     id 'io.spring.dependency-management' version "$springDependencyManagementVersion"
+    id "org.sonarqube" version "$sonarVersion"
 }
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
 
     group 'com.epam.esm'
     version '1.0-SNAPSHOT'
@@ -23,15 +25,16 @@ allprojects {
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
         compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+       // testImplementation group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.30'
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         testCompileOnly "org.projectlombok:lombok:$lombokVersion"
         testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
     }
 
 
-    configurations.all {
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-    }
+//    configurations.all {
+//        exclude group: 'ch.qos.logback', module: 'logback-classic'
+//    }
 }
 
 subprojects {
@@ -42,7 +45,13 @@ bootJar {
     enabled = false
 }
 
-
+sonarqube {
+    properties {
+        property('sonar.host.url', 'http://192.168.182.129:9000')
+        property('sonar.login', 'admin')
+        property('sonar.password', 'admin')
+    }
+}
 
 
 
