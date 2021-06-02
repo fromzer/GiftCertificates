@@ -30,6 +30,32 @@ allprojects {
         testCompileOnly "org.projectlombok:lombok:$lombokVersion"
         testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
     }
+
+}
+
+task jacocoGenerateRootReport(type: JacocoReport, group: 'Test Reporting') {
+    description = 'Generates aggregate report from all subprojects.'
+
+    def includeFilter = ['**/build/classes/java/**/*.class']
+    def excludeFilter = ['**/classes'] // classes which have duplicated names to overcome ` Can't add different class with same name issue` See https://github.com/jacoco/jacoco/issues/858
+    def classTree = fileTree(dir: "${rootProject.projectDir}", includes: includeFilter,  excludes: excludeFilter)
+    def sourceTree = fileTree(dir: "${rootProject.projectDir}", includes: ['**/src/main/java/**/*.*'])
+    def executionTree = fileTree(dir: "${rootProject.projectDir}", includes: ['**/build/jacoco/*.exec'])
+
+    classDirectories.from = files([classTree])
+    sourceDirectories.from = files([sourceTree])
+    executionData.from = files([executionTree])
+
+    reports {
+        xml.enabled true
+        xml.destination file("${rootProject.projectDir}/build/reports/jacoco/report.xml")
+    }
+}
+
+tasks.sonarqube.dependsOn jacocoGenerateRootReport
+
+jacocoGenerateRootReport {
+    dependsOn test // tests are required to run before generating the report
 }
 
 subprojects {
