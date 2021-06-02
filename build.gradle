@@ -8,7 +8,6 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'jacoco'
 
     group 'com.epam.esm'
     version '1.0-SNAPSHOT'
@@ -25,41 +24,30 @@ allprojects {
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
         compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-       // testImplementation group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.30'
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         testCompileOnly "org.projectlombok:lombok:$lombokVersion"
         testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
     }
-
-}
-
-task jacocoGenerateRootReport(type: JacocoReport, group: 'Test Reporting') {
-    description = 'Generates aggregate report from all subprojects.'
-
-    def includeFilter = ['**/build/classes/java/**/*.class']
-    def excludeFilter = ['**/classes'] // classes which have duplicated names to overcome ` Can't add different class with same name issue` See https://github.com/jacoco/jacoco/issues/858
-    def classTree = fileTree(dir: "${rootProject.projectDir}", includes: includeFilter,  excludes: excludeFilter)
-    def sourceTree = fileTree(dir: "${rootProject.projectDir}", includes: ['**/src/main/java/**/*.*'])
-    def executionTree = fileTree(dir: "${rootProject.projectDir}", includes: ['**/build/jacoco/*.exec'])
-
-    classDirectories.from = files([classTree])
-    sourceDirectories.from = files([sourceTree])
-    executionData.from = files([executionTree])
-
-    reports {
-        xml.enabled true
-        xml.destination file("${rootProject.projectDir}/build/reports/jacoco/report.xml")
-    }
-}
-
-tasks.sonarqube.dependsOn jacocoGenerateRootReport
-
-jacocoGenerateRootReport {
-    dependsOn test // tests are required to run before generating the report
 }
 
 subprojects {
     apply from: rootProject.file('gradle/profiles.gradle');
+    apply plugin: 'jacoco'
+    apply plugin: 'war'
+
+    jacocoTestReport{
+        reports {
+            xml.enabled true
+            xml.destination file("${buildDir}/jacoco/test.xml")
+            csv.enabled false
+            html.enabled false
+        }
+        dependsOn test
+    }
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
 }
 
 bootJar {
@@ -71,7 +59,6 @@ sonarqube {
         property('sonar.host.url', 'http://192.168.182.129:9000')
         property('sonar.login', 'admin')
         property('sonar.password', 'admin')
-        property 'sonar.coverage.jacoco.xmlReportPaths', "${project.buildDir}/reports/jacoco/report.xml"
     }
 }
 
