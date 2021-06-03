@@ -3,9 +3,6 @@ package com.epam.esm.configuration;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -18,7 +15,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 @Configuration
@@ -28,15 +24,6 @@ import java.util.concurrent.TimeUnit;
 public class WebConfig implements WebMvcConfigurer {
     private static final String CLASSPATH = "classpath:messages";
     private static final String ENCODING = "UTF-8";
-    @Value("${jwt.expirationInMinutes}")
-    private long expireAfterWrite;
-
-    @Bean
-    public Cache<String, String> userTokenCache() {
-        return CacheBuilder.newBuilder()
-                .expireAfterWrite(expireAfterWrite, TimeUnit.MINUTES)
-                .build();
-    }
 
     @Bean
     public ObjectMapper getObjectMapper() {
