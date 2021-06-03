@@ -1,7 +1,5 @@
 package com.epam.esm.configuration;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 @ComponentScan("com.epam.esm")
@@ -49,15 +46,6 @@ public class DataConfiguration {
     private String showSql;
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
-    @Value("${jwt.expirationInMinutes}")
-    private String expireAfterWrite;
-
-    @Bean
-    public Cache<String, String> userTokenCache() {
-        return CacheBuilder.newBuilder()
-                .expireAfterWrite(Long.parseLong(expireAfterWrite), TimeUnit.MINUTES)
-                .build();
-    }
 
     @Bean
     public DataSource dataSource() {

@@ -11,7 +11,6 @@ import com.epam.esm.security.JwtTokenProvider;
 import com.epam.esm.service.UserService;
 import com.google.common.cache.Cache;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -47,13 +46,13 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/login")
-    @PreAuthorize("isAnonymous()")
     public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequestDTO request) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
             User user = userService.findUserByLogin(request.getLogin());
             String token = jwtTokenProvider.generateToken(user);
             userTokenCache.put(user.getLogin(), token);
+            System.out.println(userTokenCache.toString());
             Map<Object, Object> response = new HashMap<>();
             response.put("login", request.getLogin());
             response.put("token", token);
@@ -69,7 +68,6 @@ public class AuthenticationRestController {
     }
 
     @PostMapping("/signup")
-    @PreAuthorize("isAnonymous()")
     public ResponseEntity<UserGift> signup(@RequestBody @Valid RegisteredUser registeredUser) {
         return ResponseEntity.ok(userService.createUser(registeredUser));
     }

@@ -1,9 +1,9 @@
 package com.epam.esm.configuration;
 
 import com.epam.esm.filter.ExceptionHandlerFilter;
-import com.epam.esm.security.JwtConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @EnableWebSecurity //(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@ComponentScan
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final int STRENGTH = 12;
 
