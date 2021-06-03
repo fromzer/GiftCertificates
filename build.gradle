@@ -33,7 +33,6 @@ allprojects {
 subprojects {
     apply from: rootProject.file('gradle/profiles.gradle');
     apply plugin: 'jacoco'
-    apply plugin: 'war'
 
     jacocoTestReport{
         reports {
@@ -45,7 +44,6 @@ subprojects {
         dependsOn test
     }
     test {
-        useJUnitPlatform()
         finalizedBy jacocoTestReport
     }
 }
@@ -58,7 +56,7 @@ sonarqube {
     properties {
         property('sonar.host.url', 'http://192.168.182.129:9000')
         property('sonar.login', 'admin')
-        property('sonar.password', 'admin')
+        property('sonar.password', '1234qwer')
     }
 }
 
