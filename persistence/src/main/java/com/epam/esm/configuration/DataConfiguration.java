@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @ComponentScan("com.epam.esm")
+@PropertySource("classpath:application.properties")
 @EnableTransactionManagement
 public class DataConfiguration {
     private final static String PACKAGE_TO_SCAN = "com.epam.esm.entity";
@@ -42,18 +44,18 @@ public class DataConfiguration {
     @Value("${spring.jpa.properties.hibernate.dialect}")
     private String hibernateDialect;
     @Value("${spring.jpa.properties.hibernate.format_sql}")
-    private String format_sql;
+    private String formatSql;
     @Value("${spring.jpa.show-sql}")
     private String showSql;
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String ddlAuto;
     @Value("${jwt.expirationInMinutes}")
-    private long expireAfterWrite;
+    private String expireAfterWrite;
 
     @Bean
     public Cache<String, String> userTokenCache() {
         return CacheBuilder.newBuilder()
-                .expireAfterWrite(expireAfterWrite, TimeUnit.MINUTES)
+                .expireAfterWrite(Long.parseLong(expireAfterWrite), TimeUnit.MINUTES)
                 .build();
     }
 
@@ -83,7 +85,7 @@ public class DataConfiguration {
     private Properties hibernateProp() {
         Properties hibernateProp = new Properties();
         hibernateProp.put(HIBERNATE_DIALECT, hibernateDialect);
-        hibernateProp.put(HIBERNATE_FORMAT_SQL, format_sql);
+        hibernateProp.put(HIBERNATE_FORMAT_SQL, formatSql);
         hibernateProp.put(HIBERNATE_SHOW_SQL, showSql);
         hibernateProp.put(HIBERNATE_HBM2DDL_AUTO, ddlAuto);
         return hibernateProp;

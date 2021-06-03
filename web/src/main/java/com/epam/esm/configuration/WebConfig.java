@@ -18,7 +18,7 @@ import java.util.List;
 
 
 @Configuration
-@ComponentScan("com.epam.esm")
+@ComponentScan
 @EnableWebMvc
 @Import(ServiceConfiguration.class)
 public class WebConfig implements WebMvcConfigurer {
